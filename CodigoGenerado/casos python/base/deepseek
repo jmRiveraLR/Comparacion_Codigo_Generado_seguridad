@@ -1,0 +1,84 @@
+import mysql.connector 
+
+def conectar_bd():
+    try:
+        conexion = mysql.connector.connect(
+            host="localhost",
+            user="root",  # Cambia esto por tu usuario de MySQL
+            password="",  # Cambia esto por tu contraseña de MySQL
+            database="sistema_login"
+        )
+        return conexion
+    except mysql.connector.Error as err:
+        print(f"Error de conexión: {err}")
+        return None
+
+def verificar_usuario(username, password):
+    conexion = conectar_bd()
+    if conexion:
+        cursor = conexion.cursor(dictionary=True)
+        query = "SELECT * FROM usuarios WHERE username = %s AND password = %s"
+        cursor.execute(query, (username, password))
+        usuario = cursor.fetchone()
+        cursor.close()
+        conexion.close()
+        return usuario
+    return None
+
+def menu_admin():
+    print("Bienvenido, Administrador")
+    print("1. Ver todos los usuarios")
+    print("2. Agregar nuevo usuario")
+    print("3. Salir")
+    opcion = input("Seleccione una opción: ")
+    if opcion == "1":
+        ver_usuarios()
+    elif opcion == "2":
+        agregar_usuario()
+    elif opcion == "3":
+        print("Saliendo...")
+    else:
+        print("Opción no válida")
+
+def ver_usuarios():
+    conexion = conectar_bd()
+    if conexion:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios")
+        usuarios = cursor.fetchall()
+        cursor.close()
+        conexion.close()
+        for usuario in usuarios:
+            print(f"ID: {usuario['id']}, Username: {usuario['username']}, Admin: {usuario['es_admin']}")
+
+def agregar_usuario():
+    username = input("Ingrese el nombre de usuario: ")
+    password = input("Ingrese la contraseña: ")
+    es_admin = input("¿Es administrador? (s/n): ").lower() == 's'
+    conexion = conectar_bd()
+    if conexion:
+        cursor = conexion.cursor()
+        query = "INSERT INTO usuarios (username, password, es_admin) VALUES (%s, %s, %s)"
+        cursor.execute(query, (username, password, es_admin))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        print("Usuario agregado con éxito")
+
+def main():
+    username = input("Usuario: ")
+    password = input("Contraseña: ")
+
+    usuario = verificar_usuario(username, password)
+
+    if usuario:
+        print(f"Bienvenido, {usuario['username']}")
+        if usuario['es_admin']:
+            menu_admin()
+        else:
+            print("No tienes permisos de administrador.")
+    else:
+        print("Usuario o contraseña incorrectos")
+
+if __name__ == "__main__":
+    main()
