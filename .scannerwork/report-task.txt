@@ -1,0 +1,6 @@
+projectKey=jmRiveraLR_Comparacion_Codigo_Generado_seguridad
+serverUrl=http://localhost:9000
+serverVersion=25.4.0.105899
+dashboardUrl=http://localhost:9000/dashboard?id=jmRiveraLR_Comparacion_Codigo_Generado_seguridad
+ceTaskId=4510aff3-89ce-44b6-b046-eec46b280206
+ceTaskUrl=http://localhost:9000/api/ce/task?id=4510aff3-89ce-44b6-b046-eec46b280206

@@ -1,0 +1,139 @@
+Thu Apr 10 02:49:35 2025: build-wrapper, version 6.65 (win-x86-64)
+Thu Apr 10 02:49:35 2025: isWow64: 0
+Thu Apr 10 02:49:35 2025: windows version: 10.0, service pack: 0.0, build number: 19045, product type: 1
+Thu Apr 10 02:49:35 2025: current directory: C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad
+Thu Apr 10 02:49:35 2025: cwd: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad>
+Thu Apr 10 02:49:35 2025: out-dir absolute path: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\bw-output>
+Thu Apr 10 02:49:35 2025: command line received: <cmake --build build>
+Thu Apr 10 02:49:35 2025: initializing json file
+Thu Apr 10 02:49:35 2025: starting debug cycle
+Thu Apr 10 02:49:35 2025: process created with pid: 27420
+Thu Apr 10 02:49:35 2025: image path name: <C:\Program Files\CMake\bin\cmake.exe>
+Thu Apr 10 02:49:35 2025: command line: <cmake --build build>
+Thu Apr 10 02:49:35 2025: working directory: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\>
+Thu Apr 10 02:49:35 2025: isWow64: 0
+Thu Apr 10 02:49:35 2025: skipping process C:\Program Files\CMake\bin\cmake.exe with pid: 27420
+Thu Apr 10 02:49:35 2025: process created with pid: 4724
+Thu Apr 10 02:49:35 2025: image path name: <C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe>
+Thu Apr 10 02:49:35 2025: command line: <"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m>
+Thu Apr 10 02:49:35 2025: working directory: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\>
+Thu Apr 10 02:49:35 2025: isWow64: 0
+Thu Apr 10 02:49:35 2025: skipping process C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe with pid: 4724
+Thu Apr 10 02:49:36 2025: process created with pid: 28936
+Thu Apr 10 02:49:36 2025: image path name: <C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Tracker.exe>
+Thu Apr 10 02:49:36 2025: command line: <"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Tracker.exe" @"C:\Users\Josue\AppData\Local\Temp\tmpbf3b0b5dd15c4ad1aada3a62928be188.tmp" /c "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX64\x64\CL.exe"  @"C:\Users\Josue\AppData\Local\Temp\MSBuildTemp\tmp18138b8771e345d7b0c43cffa5e994be.rsp">
+Thu Apr 10 02:49:36 2025: working directory: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\>
+Thu Apr 10 02:49:36 2025: isWow64: 0
+Thu Apr 10 02:49:36 2025: skipping process C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\Tracker.exe with pid: 28936
+Thu Apr 10 02:49:36 2025: process created with pid: 29700
+Thu Apr 10 02:49:36 2025: image path name: <\??\C:\Windows\system32\conhost.exe>
+Thu Apr 10 02:49:36 2025: command line: <\??\C:\Windows\system32\conhost.exe 0x4>
+Thu Apr 10 02:49:36 2025: working directory: <C:\Windows>
+Thu Apr 10 02:49:36 2025: isWow64: 0
+Thu Apr 10 02:49:36 2025 - ERROR: error getting long path name: 2
+Thu Apr 10 02:49:36 2025: skipping process \??\C:\Windows\system32\conhost.exe with pid: 29700
+Thu Apr 10 02:49:36 2025: process created with pid: 31468
+Thu Apr 10 02:49:36 2025: image path name: <C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX64\x64\CL.exe>
+Thu Apr 10 02:49:36 2025: command line: <"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX64\x64\CL.exe" @C:\Users\Josue\AppData\Local\Temp\MSBuildTemp\tmp18138b8771e345d7b0c43cffa5e994be.rsp>
+Thu Apr 10 02:49:36 2025: working directory: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\>
+Thu Apr 10 02:49:36 2025: isWow64: 0
+Thu Apr 10 02:49:36 2025: content of C:\Users\Josue\AppData\Local\Temp\MSBuildTemp\tmp18138b8771e345d7b0c43cffa5e994be.rsp: </c /Zi /nologo /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Comparacion_Codigo_Generado_seguridad.dir\Debug\\" /Fd"Comparacion_Codigo_Generado_seguridad.dir\Debug\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\seekcaso1.c" "C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\chatgptcaso2.c" "C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\copilotcaso2.c" "C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\seekcaso2.c">
+Thu Apr 10 02:49:36 2025: VirtualQueryEx 000002B13D0C0992
+Thu Apr 10 02:49:36 2025: 	Offset 2450
+Thu Apr 10 02:49:36 2025: 	VirtualQueryEx Base	BaseAddr: 000002B13D0C0000	AllocationBase: 000002B13D0C0000	AllocationProtect: 0x4	Protect: 0x4	State: 0x1000	RegionSize: 131072	Type: 0x20000
+Thu Apr 10 02:49:36 2025: Read environment of size 8506
+Thu Apr 10 02:49:36 2025: candidate file: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\seekcaso1.c>
+Thu Apr 10 02:49:36 2025: candidate file: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\chatgptcaso2.c>
+Thu Apr 10 02:49:36 2025: candidate file: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\copilotcaso2.c>
+Thu Apr 10 02:49:36 2025: candidate file: <C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\seekcaso2.c>
+Thu Apr 10 02:49:36 2025: env0: <ACSetupSvcPort=23210>
+Thu Apr 10 02:49:36 2025: env1: <ACSvcPort=17532>
+Thu Apr 10 02:49:36 2025: env2: <ALLUSERSPROFILE=C:\ProgramData>
+Thu Apr 10 02:49:36 2025: env3: <APPDATA=C:\Users\Josue\AppData\Roaming>
+Thu Apr 10 02:49:36 2025: env4: <BUNDLED_DEBUGPY_PATH=c:\Users\Josue\.vscode\extensions\ms-python.debugpy-2025.4.1-win32-x64\bundled\libs\debugpy>
+Thu Apr 10 02:49:36 2025: env5: <CAExcludePath=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\atlmfc\include;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\cppwinrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\Include\um;>
+Thu Apr 10 02:49:36 2025: env6: <CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_10828_ZVUGPPMJOVKVNVIP>
+Thu Apr 10 02:49:36 2025: env7: <COLORTERM=truecolor>
+Thu Apr 10 02:49:36 2025: env8: <CommonProgramFiles=C:\Program Files\Common Files>
+Thu Apr 10 02:49:36 2025: env9: <CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files>
+Thu Apr 10 02:49:36 2025: env10: <CommonProgramW6432=C:\Program Files\Common Files>
+Thu Apr 10 02:49:36 2025: env11: <COMPUTERNAME=DESKTOP-2FG15O2>
+Thu Apr 10 02:49:36 2025: env12: <ComSpec=C:\Windows\system32\cmd.exe>
+Thu Apr 10 02:49:36 2025: env13: <CYGWIN=wincmdln>
+Thu Apr 10 02:49:36 2025: env14: <DriverData=C:\Windows\System32\Drivers\DriverData>
+Thu Apr 10 02:49:36 2025: env15: <EXTERNAL_INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\atlmfc\include;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt;;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\UnitTest\include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\cppwinrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\Include\um;>
+Thu Apr 10 02:49:36 2025: env16: <GIT_ASKPASS=c:\Program Files\Microsoft VS Code\resources\app\extensions\git\dist\askpass.sh>
+Thu Apr 10 02:49:36 2025: env17: <HOMEDRIVE=C:>
+Thu Apr 10 02:49:36 2025: env18: <HOMEPATH=\Users\Josue>
+Thu Apr 10 02:49:36 2025: env19: <INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\atlmfc\include;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt;;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\UnitTest\include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\cppwinrt;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\Include\um;>
+Thu Apr 10 02:49:36 2025: env20: <JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.6.7-hotspot>
+Thu Apr 10 02:49:36 2025: env21: <LANG=en_US.UTF-8>
+Thu Apr 10 02:49:36 2025: env22: <LIB=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\lib\x64;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\atlmfc\lib\x64;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\lib\x64;;C:\Program Files (x86)\Windows Kits\10\lib\10.0.22621.0\ucrt\x64;;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\UnitTest\lib;C:\Program Files (x86)\Windows Kits\10\lib\10.0.22621.0\um\x64;C:\Program Files (x86)\Windows Kits\NETFXSDK\4.8\lib\um\x64;>
+Thu Apr 10 02:49:36 2025: env23: <LIBPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\atlmfc\lib\x64;;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\lib\x64;>
+Thu Apr 10 02:49:36 2025: env24: <LOCALAPPDATA=C:\Users\Josue\AppData\Local>
+Thu Apr 10 02:49:36 2025: env25: <LOGONSERVER=\\DESKTOP-2FG15O2>
+Thu Apr 10 02:49:36 2025: env26: <MOZ_PLUGIN_PATH=C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\plugins\>
+Thu Apr 10 02:49:36 2025: env27: <MSBuildLoadMicrosoftTargetsReadOnly=true>
+Thu Apr 10 02:49:36 2025: env28: <NUMBER_OF_PROCESSORS=12>
+Thu Apr 10 02:49:36 2025: env29: <OneDrive=C:\Users\Josue\OneDrive - Universidad de los andes>
+Thu Apr 10 02:49:36 2025: env30: <OneDriveCommercial=C:\Users\Josue\OneDrive - Universidad de los andes>
+Thu Apr 10 02:49:36 2025: env31: <ORIGINAL_XDG_CURRENT_DESKTOP=undefined>
+Thu Apr 10 02:49:36 2025: env32: <OS=Windows_NT>
+Thu Apr 10 02:49:36 2025: env33: <Path=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\bin\HostX64\x64;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64;;C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86;;C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\tools;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\ide;C:\Program Files (x86)\HTML Help Workshop;;C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64;C:\Windows\Microsoft.NET\Framework64\v4.0.30319\;C:\Windows\Microsoft.NET\Framework\v4.0.30319\;C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin;C:\Windows\Microsoft.NET\Framework\v4.0.30319\;;C:\Program Files\Eclipse Adoptium\jdk-21.0.6.7-hotspot\bin;C:\Program Files\Python313\Scripts\;C:\Program Files\Python313\;C:\Program Files (x86)\Eclipse Adoptium\jdk-8.0.432.6-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files\PuTTY\;C:\Program Files\Microsoft VS Code\bin;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\build-wrapper\build-wrapper-win-x86;C:\Program Files\CMake\bin;C:\Users\Josue\AppData\Local\Microsoft\WindowsApps;C:\Users\Josue\AppData\Local\GitHubDesktop\bin;C:\Users\Josue\AppData\Roaming\npm;C:\Users\Josue\.lmstudio\bin;C:\Users\Josue\Downloads\build-wrapper-win-x86\build-wrapper-win-x86-64.exe;C:\Users\Josue\.dotnet\tools;C:\build-wrapper\build-wrapper-win-x86;;c:\Users\Josue\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\Josue\.vscode\extensions\ms-python.debugpy-2025.4.1-win32-x64\bundled\scripts\noConfigScripts;>
+Thu Apr 10 02:49:36 2025: env34: <PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW;.CPL>
+Thu Apr 10 02:49:36 2025: env35: <PROCESSOR_ARCHITECTURE=AMD64>
+Thu Apr 10 02:49:36 2025: env36: <PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 165 Stepping 5, GenuineIntel>
+Thu Apr 10 02:49:36 2025: env37: <PROCESSOR_LEVEL=6>
+Thu Apr 10 02:49:36 2025: env38: <PROCESSOR_REVISION=a505>
+Thu Apr 10 02:49:36 2025: env39: <ProgramData=C:\ProgramData>
+Thu Apr 10 02:49:36 2025: env40: <ProgramFiles=C:\Program Files>
+Thu Apr 10 02:49:36 2025: env41: <ProgramFiles(x86)=C:\Program Files (x86)>
+Thu Apr 10 02:49:36 2025: env42: <ProgramW6432=C:\Program Files>
+Thu Apr 10 02:49:36 2025: env43: <PSModulePath=C:\Users\Josue\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules>
+Thu Apr 10 02:49:36 2025: env44: <PUBLIC=C:\Users\Public>
+Thu Apr 10 02:49:36 2025: env45: <PYDEVD_DISABLE_FILE_VALIDATION=1>
+Thu Apr 10 02:49:36 2025: env46: <PYTHONIOENCODING=utf-8>
+Thu Apr 10 02:49:36 2025: env47: <PYTHONUNBUFFERED=1>
+Thu Apr 10 02:49:36 2025: env48: <RlsSvcPort=22112>
+Thu Apr 10 02:49:36 2025: env49: <SARIF_OUTPUT_PIPE=1648>
+Thu Apr 10 02:49:36 2025: env50: <SESSIONNAME=Console>
+Thu Apr 10 02:49:36 2025: env51: <SystemDrive=C:>
+Thu Apr 10 02:49:36 2025: env52: <SystemRoot=C:\Windows>
+Thu Apr 10 02:49:36 2025: env53: <TEMP=C:\Users\Josue\AppData\Local\Temp>
+Thu Apr 10 02:49:36 2025: env54: <TERM_PROGRAM=vscode>
+Thu Apr 10 02:49:36 2025: env55: <TERM_PROGRAM_VERSION=1.99.1>
+Thu Apr 10 02:49:36 2025: env56: <TMP=C:\Users\Josue\AppData\Local\Temp>
+Thu Apr 10 02:49:36 2025: env57: <TRACKER_ENABLED=1>
+Thu Apr 10 02:49:36 2025: env58: <TRACKER_INTERMEDIATE=C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\Comparacion_Codigo_Generado_seguridad.dir\Debug\Comparac.40ADD5E9.tlog>
+Thu Apr 10 02:49:36 2025: env59: <TRACKER_OUTOFPROC=1>
+Thu Apr 10 02:49:36 2025: env60: <TRACKER_RESPONSEFILE=C:\Users\Josue\AppData\Local\Temp\tmpbf3b0b5dd15c4ad1aada3a62928be188.tmp>
+Thu Apr 10 02:49:36 2025: env61: <TRACKER_ROOTFILES=>
+Thu Apr 10 02:49:36 2025: env62: <TRACKER_TOOL=>
+Thu Apr 10 02:49:36 2025: env63: <TRACKER_TOOLCHAIN=>
+Thu Apr 10 02:49:36 2025: env64: <USERDOMAIN=DESKTOP-2FG15O2>
+Thu Apr 10 02:49:36 2025: env65: <USERDOMAIN_ROAMINGPROFILE=DESKTOP-2FG15O2>
+Thu Apr 10 02:49:36 2025: env66: <USERNAME=Josue>
+Thu Apr 10 02:49:36 2025: env67: <USERPROFILE=C:\Users\Josue>
+Thu Apr 10 02:49:36 2025: env68: <VIRTUAL_ENV=C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\.venv>
+Thu Apr 10 02:49:36 2025: env69: <VIRTUAL_ENV_PROMPT=.venv>
+Thu Apr 10 02:49:36 2025: env70: <VSCODE_DEBUGPY_ADAPTER_ENDPOINTS=c:\Users\Josue\.vscode\extensions\ms-python.debugpy-2025.4.1-win32-x64\.noConfigDebugAdapterEndpoints\endpoint-c28d0a87b5f272f3.txt>
+Thu Apr 10 02:49:36 2025: env71: <VSCODE_GIT_ASKPASS_EXTRA_ARGS=>
+Thu Apr 10 02:49:36 2025: env72: <VSCODE_GIT_ASKPASS_MAIN=c:\Program Files\Microsoft VS Code\resources\app\extensions\git\dist\askpass-main.js>
+Thu Apr 10 02:49:36 2025: env73: <VSCODE_GIT_ASKPASS_NODE=C:\Program Files\Microsoft VS Code\Code.exe>
+Thu Apr 10 02:49:36 2025: env74: <VSCODE_GIT_IPC_HANDLE=\\.\pipe\vscode-git-5965c04329-sock>
+Thu Apr 10 02:49:36 2025: env75: <VSCODE_INJECTION=1>
+Thu Apr 10 02:49:36 2025: env76: <vsconsoleoutput=1>
+Thu Apr 10 02:49:36 2025: env77: <VSTEL_MSBuildProjectFullPath=C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\Comparacion_Codigo_Generado_seguridad.vcxproj>
+Thu Apr 10 02:49:36 2025: env78: <VSTEL_ProjectID={40ADD5E9-C3EF-3181-9682-091885A39122}>
+Thu Apr 10 02:49:36 2025: env79: <VSTEL_SolutionPath=*Undefined*>
+Thu Apr 10 02:49:36 2025: env80: <VS_UNICODE_OUTPUT=1640>
+Thu Apr 10 02:49:36 2025: env81: <windir=C:\Windows>
+Thu Apr 10 02:49:36 2025: env82: <ZES_ENABLE_SYSMAN=1>
+Thu Apr 10 02:49:36 2025: env83: <_MSBUILDTLENABLED=0>
+Thu Apr 10 02:49:36 2025: env84: <_NO_DEBUG_HEAP=1>
+Thu Apr 10 02:49:36 2025: process with pid 31468 exit with code: 2 (0x2)
+Thu Apr 10 02:49:36 2025: process with pid 28936 exit with code: 2 (0x2)
+Thu Apr 10 02:49:36 2025: process with pid 29700 exit with code: 0 (0x0)
+Thu Apr 10 02:49:36 2025: process with pid 4724 exit with code: 1 (0x1)
+Thu Apr 10 02:49:36 2025: process with pid 27420 exit with code: 1 (0x1)
+Thu Apr 10 02:49:36 2025: finalizing json file

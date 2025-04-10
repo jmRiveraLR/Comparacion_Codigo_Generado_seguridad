@@ -1,7 +1,8 @@
 {
     "sonarlint.connectedMode.project": {
         "connectionId": "jmriveralr",
-        "projectKey": "jmRiveraLR_Comparacion_Codigo_Generado_seguridad"
+        "projectKey": "Comparacion_Codigo_Generado_seguridad"
     },
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "makefile.makePath": "C:\\Users\\Josue\\Documents\\GitHub\\Comparacion_Codigo_Generado_seguridad\\bin\\make.exe"
 }

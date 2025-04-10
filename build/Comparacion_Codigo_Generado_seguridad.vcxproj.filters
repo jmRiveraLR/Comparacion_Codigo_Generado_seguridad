@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\CMakeFiles\4.0.0\CompilerIdC\CMakeCCompilerId.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\chatgpt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\copilot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\deepseek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\chatgptcaso1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\copilotcaso1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\seekcaso1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\chatgptcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\copilotcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\seekcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\chatgpt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\copilot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\deepseek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7EE10EBE-8DDE-3958-9D0E-D8E70B94763B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

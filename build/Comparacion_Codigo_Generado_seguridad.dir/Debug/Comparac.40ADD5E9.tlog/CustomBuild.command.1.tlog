@@ -1,0 +1,10 @@
+^C:\USERS\JOSUE\DOCUMENTS\GITHUB\COMPARACION_CODIGO_GENERADO_SEGURIDAD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Josue/Documents/GitHub/Comparacion_Codigo_Generado_seguridad -BC:/Users/Josue/Documents/GitHub/Comparacion_Codigo_Generado_seguridad/build --check-stamp-file C:/Users/Josue/Documents/GitHub/Comparacion_Codigo_Generado_seguridad/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
