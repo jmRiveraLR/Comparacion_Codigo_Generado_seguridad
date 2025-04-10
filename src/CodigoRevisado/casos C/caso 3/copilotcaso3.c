@@ -1,110 +1,116 @@
-#include <microhttpd.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <openssl/sha.h>
+#include <stdlib.h>
+#include <sys/inotify.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/stat.h>
 
-// Base de datos simulada (contraseñas encriptadas con SHA-256 para demo)
-typedef struct {
-    const char *username;
-    const char *hashed_password;
-} User;
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 
-User users[] = {
-    {"admin", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e9cdb5fba6d9f8f"}, // Hash de "1234"
-    {"user1", "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd87eb8b5cd6d89f7ef"} // Hash de "password"
-};
-
-// Función para calcular el hash SHA-256
-void hash_password(const char *password, char *output) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char *)password, strlen(password), hash);
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-        sprintf(output + (i * 2), "%02x", hash[i]);
+void log_event(const char *log_file, const char *event_desc, const char *file_name) {
+    int fd = open(log_file, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+    if (fd < 0) {
+        perror("Error al abrir el archivo de log");
+        exit(EXIT_FAILURE);
     }
-    output[SHA256_DIGEST_LENGTH * 2] = '\0';
+
+    struct flock lock;
+    lock.l_type = F_WRLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+
+    if (fcntl(fd, F_SETLK, &lock) == -1) {
+        perror("Error al bloquear el archivo de log");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    time_t now = time(NULL);
+    struct tm *timeinfo = localtime(&now);
+
+    char time_str[20];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    char log_entry[256];
+    snprintf(log_entry, sizeof(log_entry), "[%s] %s: %s\n", time_str, event_desc, file_name);
+
+    if (write(fd, log_entry, strlen(log_entry)) < 0) {
+        perror("Error al escribir en el archivo de log");
+    }
+
+    lock.l_type = F_UNLCK;
+    fcntl(fd, F_SETLK, &lock);
+
+    close(fd);
 }
 
-// Función para verificar credenciales
-int verify_credentials(const char *username, const char *password) {
-    char hashed_password[SHA256_DIGEST_LENGTH * 2 + 1];
-    hash_password(password, hashed_password);
+void validate_path(const char *path) {
+    struct stat path_stat;
+    if (stat(path, &path_stat) != 0 || !S_ISDIR(path_stat.st_mode)) {
+        fprintf(stderr, "El directorio especificado no es válido o no existe.\n");
+        exit(EXIT_FAILURE);
+    }
+}
 
-    for (size_t i = 0; i < sizeof(users) / sizeof(users[0]); ++i) {
-        if (strcmp(users[i].username, username) == 0 && strcmp(users[i].hashed_password, hashed_password) == 0) {
-            return 1; // Credenciales válidas
+int main(int argc, char **argv) {
+    if (argc < 3) {
+        fprintf(stderr, "Uso: %s <directorio_a_monitorizar> <archivo_de_log>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    const char *directory = argv[1];
+    const char *log_file = argv[2];
+
+    validate_path(directory);
+
+    int inotify_fd = inotify_init1(IN_NONBLOCK);
+    if (inotify_fd < 0) {
+        perror("Error inicializando inotify");
+        exit(EXIT_FAILURE);
+    }
+
+    int watch_descriptor = inotify_add_watch(inotify_fd, directory, IN_CREATE | IN_MODIFY | IN_DELETE);
+    if (watch_descriptor < 0) {
+        perror("Error añadiendo watch");
+        close(inotify_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    char buffer[EVENT_BUF_LEN];
+
+    printf("Monitorizando cambios en el directorio: %s\n", directory);
+
+    while (1) {
+        int length = read(inotify_fd, buffer, EVENT_BUF_LEN);
+        if (length < 0 && errno != EAGAIN) {
+            perror("Error leyendo eventos");
+            break;
         }
-    }
-    return 0; // Credenciales inválidas
-}
 
-// Función para validar las entradas del usuario (prevención de inyecciones)
-int validate_input(const char *input) {
-    // Solo permite caracteres alfanuméricos básicos
-    for (size_t i = 0; input[i] != '\0'; i++) {
-        if (!(isalnum(input[i]) || input[i] == '_' || input[i] == '-')) {
-            return 0; // Entrada inválida
-        }
-    }
-    return 1; // Entrada válida
-}
+        int i = 0;
+        while (i < length) {
+            struct inotify_event *event = (struct inotify_event *)&buffer[i];
 
-// Función para manejar las peticiones
-int handle_request(void *cls, struct MHD_Connection *connection,
-                   const char *url, const char *method,
-                   const char *version, const char *upload_data,
-                   size_t *upload_data_size, void **con_cls) {
-    const char *response_text;
-    struct MHD_Response *response;
-    int status_code;
-
-    if (strcmp(url, "/login") == 0) {
-        if (strcmp(method, "POST") == 0) {
-            const char *username = MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "username");
-            const char *password = MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "password");
-
-            if (username && password && validate_input(username) && validate_input(password)) {
-                if (verify_credentials(username, password)) {
-                    response_text = "Login successful";
-                    status_code = MHD_HTTP_OK;
-                } else {
-                    response_text = "Invalid login";
-                    status_code = MHD_HTTP_UNAUTHORIZED;
+            if (event->len) {
+                if (event->mask & IN_CREATE) {
+                    log_event(log_file, "CREACIÓN", event->name);
+                } else if (event->mask & IN_MODIFY) {
+                    log_event(log_file, "MODIFICACIÓN", event->name);
+                } else if (event->mask & IN_DELETE) {
+                    log_event(log_file, "ELIMINACIÓN", event->name);
                 }
-            } else {
-                response_text = "Invalid input";
-                status_code = MHD_HTTP_BAD_REQUEST;
             }
-        } else {
-            response_text = "Method not allowed";
-            status_code = MHD_HTTP_METHOD_NOT_ALLOWED;
+
+            i += EVENT_SIZE + event->len;
         }
-    } else {
-        response_text = "Not found";
-        status_code = MHD_HTTP_NOT_FOUND;
     }
 
-    response = MHD_create_response_from_buffer(strlen(response_text), (void *)response_text, MHD_RESPMEM_PERSISTENT);
-    int ret = MHD_queue_response(connection, status_code, response);
-    MHD_destroy_response(response);
-    return ret;
-}
-
-// Función principal
-int main() {
-    struct MHD_Daemon *daemon;
-
-    printf("Starting server on port 8080...\n");
-    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD, 8080, NULL, NULL,
-                              &handle_request, NULL, MHD_OPTION_END);
-    if (daemon == NULL) {
-        fprintf(stderr, "Could not start server.\n");
-        return 1;
-    }
-
-    printf("Server running. Press Enter to stop...\n");
-    getchar(); // Mantener el servidor en ejecución
-
-    MHD_stop_daemon(daemon);
+    inotify_rm_watch(inotify_fd, watch_descriptor);
+    close(inotify_fd);
     return 0;
 }
