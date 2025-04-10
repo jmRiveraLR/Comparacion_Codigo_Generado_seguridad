@@ -1,82 +1,81 @@
-#include <microhttpd.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/inotify.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
 
-// Base de datos simulada
-typedef struct {
-    const char *username;
-    const char *password;
-} User;
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 
-User users[] = {
-    {"admin", "1234"},
-    {"user1", "password"}
-};
-
-// Función para verificar credenciales
-int verify_credentials(const char *username, const char *password) {
-    for (size_t i = 0; i < sizeof(users) / sizeof(users[0]); ++i) {
-        if (strcmp(users[i].username, username) == 0 && strcmp(users[i].password, password) == 0) {
-            return 1; // Credenciales válidas
-        }
+void log_event(const char *log_file, const char *event_desc, const char *file_name) {
+    FILE *log = fopen(log_file, "a");
+    if (log == NULL) {
+        perror("Error abriendo el archivo de log");
+        exit(EXIT_FAILURE);
     }
-    return 0; // Credenciales inválidas
+
+    time_t now = time(NULL);
+    struct tm *timeinfo = localtime(&now);
+
+    char time_str[20];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+    fprintf(log, "[%s] %s: %s\n", time_str, event_desc, file_name);
+    fclose(log);
 }
 
-// Función para manejar las peticiones
-int handle_request(void *cls, struct MHD_Connection *connection,
-                   const char *url, const char *method,
-                   const char *version, const char *upload_data,
-                   size_t *upload_data_size, void **con_cls) {
-    const char *response_text;
-    struct MHD_Response *response;
-    int status_code;
+int main(int argc, char **argv) {
+    if (argc < 3) {
+        fprintf(stderr, "Uso: %s <directorio_a_monitorizar> <archivo_de_log>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
-    if (strcmp(url, "/login") == 0) {
-        if (strcmp(method, "POST") == 0) {
-            const char *username = MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "username");
-            const char *password = MHD_lookup_connection_value(connection, MHD_POSTDATA_KIND, "password");
+    const char *directory = argv[1];
+    const char *log_file = argv[2];
+    int inotify_fd = inotify_init();
 
-            if (username && password && verify_credentials(username, password)) {
-                response_text = "Login exitoso";
-                status_code = MHD_HTTP_OK;
-            } else {
-                response_text = "Login inválido";
-                status_code = MHD_HTTP_UNAUTHORIZED;
+    if (inotify_fd < 0) {
+        perror("Error inicializando inotify");
+        exit(EXIT_FAILURE);
+    }
+
+    int watch_descriptor = inotify_add_watch(inotify_fd, directory, IN_CREATE | IN_MODIFY | IN_DELETE);
+    if (watch_descriptor < 0) {
+        perror("Error añadiendo watch");
+        exit(EXIT_FAILURE);
+    }
+
+    char buffer[EVENT_BUF_LEN];
+
+    printf("Monitorizando cambios en el directorio: %s\n", directory);
+
+    while (1) {
+        int length = read(inotify_fd, buffer, EVENT_BUF_LEN);
+        if (length < 0) {
+            perror("Error leyendo eventos");
+            exit(EXIT_FAILURE);
+        }
+
+        int i = 0;
+        while (i < length) {
+            struct inotify_event *event = (struct inotify_event *)&buffer[i];
+
+            if (event->len) {
+                if (event->mask & IN_CREATE) {
+                    log_event(log_file, "CREACIÓN", event->name);
+                } else if (event->mask & IN_MODIFY) {
+                    log_event(log_file, "MODIFICACIÓN", event->name);
+                } else if (event->mask & IN_DELETE) {
+                    log_event(log_file, "ELIMINACIÓN", event->name);
+                }
             }
-        } else if (strcmp(method, "GET") == 0) {
-            response_text = "Por favor, use POST para iniciar sesión.";
-            status_code = MHD_HTTP_METHOD_NOT_ALLOWED;
-        } else {
-            response_text = "Método no soportado.";
-            status_code = MHD_HTTP_BAD_REQUEST;
+
+            i += EVENT_SIZE + event->len;
         }
-    } else {
-        response_text = "Ruta no encontrada.";
-        status_code = MHD_HTTP_NOT_FOUND;
     }
 
-    response = MHD_create_response_from_buffer(strlen(response_text), (void *)response_text, MHD_RESPMEM_PERSISTENT);
-    int ret = MHD_queue_response(connection, status_code, response);
-    MHD_destroy_response(response);
-    return ret;
-}
-
-// Función principal
-int main() {
-    struct MHD_Daemon *daemon;
-
-    daemon = MHD_start_daemon(MHD_USE_INTERNAL_POLLING_THREAD, 8080, NULL, NULL,
-                              &handle_request, NULL, MHD_OPTION_END);
-    if (daemon == NULL) {
-        fprintf(stderr, "No se pudo iniciar el servidor.\n");
-        return 1;
-    }
-
-    printf("Servidor iniciado en el puerto 8080...\n");
-    getchar(); // Mantener el servidor en ejecución
-
-    MHD_stop_daemon(daemon);
+    inotify_rm_watch(inotify_fd, watch_descriptor);
+    close(inotify_fd);
     return 0;
 }

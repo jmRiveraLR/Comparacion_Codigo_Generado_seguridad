@@ -1,94 +1,98 @@
-#include "mongoose.h"
-#include <sqlite3.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/inotify.h>
+#include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <limits.h>
+#include <errno.h>
 
-#define DB_FILE "usuarios.db"
+#define EVENT_SIZE  (sizeof(struct inotify_event))
+#define BUF_LEN     (1024 * (EVENT_SIZE + NAME_MAX + 1))
+#define LOG_FILE    "monitor_log.txt"
 
-static sqlite3 *db;
-
-static void init_db() {
-    char *err_msg = NULL;
-    const char *sql = "CREATE TABLE IF NOT EXISTS usuarios ("
-                      "usuario TEXT PRIMARY KEY,"
-                      "contrasena TEXT);"
-                      "INSERT OR IGNORE INTO usuarios (usuario, contrasena) VALUES ('admin', '1234');";
-
-    if (sqlite3_open(DB_FILE, &db) != SQLITE_OK) {
-        fprintf(stderr, "No se pudo abrir la base de datos: %s\n", sqlite3_errmsg(db));
-        exit(1);
-    }
-
-    if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "Error al crear tabla: %s\n", err_msg);
-        sqlite3_free(err_msg);
-        exit(1);
-    }
+// Devuelve el timestamp formateado
+void get_timestamp(char *buffer, size_t len) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    strftime(buffer, len, "%Y-%m-%d %H:%M:%S", t);
 }
 
-int verificar_credenciales(const char *usuario, const char *contrasena) {
-    sqlite3_stmt *stmt;
-    const char *sql = "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?";
-    int encontrado = 0;
+// Registra un evento en el archivo de log
+void log_event(const char *event_type, const char *filename) {
+    FILE *log = fopen(LOG_FILE, "a");
+    if (!log) {
+        perror("fopen");
+        return;
+    }
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, usuario, -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 2, contrasena, -1, SQLITE_STATIC);
+    char timestamp[64];
+    get_timestamp(timestamp, sizeof(timestamp));
+    fprintf(log, "[%s] %s - %s\n", timestamp, event_type, filename);
+    fclose(log);
+}
 
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            encontrado = 1;
+// Mapea códigos de evento a texto legible
+const char *get_event_name(uint32_t mask) {
+    if (mask & IN_CREATE) return "CREADO";
+    if (mask & IN_MODIFY) return "MODIFICADO";
+    if (mask & IN_DELETE) return "ELIMINADO";
+    if (mask & IN_MOVED_FROM) return "MOVIDO_DESDE";
+    if (mask & IN_MOVED_TO) return "MOVIDO_A";
+    return "OTRO_EVENTO";
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Uso: %s <directorio_a_monitorizar>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    const char *path_to_watch = argv[1];
+
+    int inotify_fd = inotify_init1(IN_NONBLOCK);
+    if (inotify_fd < 0) {
+        perror("inotify_init1");
+        exit(EXIT_FAILURE);
+    }
+
+    int wd = inotify_add_watch(inotify_fd, path_to_watch,
+                                IN_CREATE | IN_MODIFY | IN_DELETE |
+                                IN_MOVED_FROM | IN_MOVED_TO);
+    if (wd == -1) {
+        perror("inotify_add_watch");
+        close(inotify_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Monitorizando el directorio: %s\n", path_to_watch);
+    printf("Presiona Ctrl+C para salir...\n");
+
+    char buffer[BUF_LEN];
+    while (1) {
+        ssize_t length = read(inotify_fd, buffer, BUF_LEN);
+        if (length < 0 && errno != EAGAIN) {
+            perror("read");
+            break;
+        }
+
+        if (length <= 0) {
+            usleep(500 * 1000); // Espera breve (500ms)
+            continue;
+        }
+
+        ssize_t i = 0;
+        while (i < length) {
+            struct inotify_event *event = (struct inotify_event *) &buffer[i];
+            if (event->len) {
+                const char *event_type = get_event_name(event->mask);
+                log_event(event_type, event->name);
+                printf("[%s] %s\n", event_type, event->name);
+            }
+            i += EVENT_SIZE + event->len;
         }
     }
 
-    sqlite3_finalize(stmt);
-    return encontrado;
-}
-
-static void handle_login(struct mg_connection *c, struct mg_http_message *hm) {
-    if (mg_vcmp(&hm->method, "GET") == 0) {
-        const char *form = "<form method='POST' action='/login'>"
-                           "Usuario: <input name='usuario'><br>"
-                           "Contraseña: <input name='contrasena' type='password'><br>"
-                           "<button type='submit'>Login</button></form>";
-        mg_http_reply(c, 200, "Content-Type: text/html\r\n", "%s", form);
-    } else if (mg_vcmp(&hm->method, "POST") == 0) {
-        char usuario[100], contrasena[100];
-        mg_http_get_var(&hm->body, "usuario", usuario, sizeof(usuario));
-        mg_http_get_var(&hm->body, "contrasena", contrasena, sizeof(contrasena));
-
-        if (verificar_credenciales(usuario, contrasena)) {
-            mg_http_reply(c, 200, "", "Login exitoso!\n");
-        } else {
-            mg_http_reply(c, 401, "", "Login inválido\n");
-        }
-    } else {
-        mg_http_reply(c, 405, "", "Método no permitido\n");
-    }
-}
-
-static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
-    if (ev == MG_EV_HTTP_MSG) {
-        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-
-        if (mg_http_match_uri(hm, "/login")) {
-            handle_login(c, hm);
-        } else {
-            mg_http_reply(c, 404, "", "Ruta no encontrada\n");
-        }
-    }
-}
-
-int main(void) {
-    struct mg_mgr mgr;
-    mg_mgr_init(&mgr);
-
-    init_db();
-
-    mg_http_listen(&mgr, "http://localhost:8000", cb, NULL);
-    printf("Servidor corriendo en http://localhost:8000\n");
-
-    for (;;) mg_mgr_poll(&mgr, 1000);
-    sqlite3_close(db);
-    mg_mgr_free(&mgr);
+    close(inotify_fd);
     return 0;
 }
