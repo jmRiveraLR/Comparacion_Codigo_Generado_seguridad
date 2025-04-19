@@ -31,6 +31,15 @@
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\seekcaso2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\chatgptcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\copilotcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\seekcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\chatgpt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +47,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\deepseek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\chatgptcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\copilotcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\seekcaso2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\chatgptcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\copilotcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\seekcaso3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
