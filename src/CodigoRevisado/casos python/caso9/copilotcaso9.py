@@ -1,50 +1,96 @@
-import csv
+from fastapi import FastAPI, UploadFile, HTTPException, Depends
+from fastapi.responses import FileResponse
+from tempfile import NamedTemporaryFile
+from uuid import uuid4
+from pathlib import Path
+from threading import Timer
 import os
+from typing import Dict
+from pydantic import BaseModel
+from passlib.context import CryptContext
+import hashlib
 
-def calcular_promedios(archivo_entrada, archivo_salida):
+app = FastAPI()
+
+# Diccionario para almacenar archivos con control de expiración
+files_storage: Dict[str, dict] = {}
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class AuthToken(BaseModel):
+    token: str
+
+def hash_file(file_path: str) -> str:
+    """Generar un hash único para el archivo."""
+    with open(file_path, "rb") as f:
+        file_data = f.read()
+        return hashlib.sha256(file_data).hexdigest()
+
+def authenticate(token: AuthToken):
+    # Simulación de autenticación basada en token (mejorar con JWT u OAuth2)
+    if token.token != "secure_token":
+        raise HTTPException(status_code=403, detail="No autorizado.")
+
+@app.post("/convert/")
+async def convert_docx_to_pdf(file: UploadFile, auth: AuthToken = Depends(authenticate)):
+    # Validar tipo de archivo y tamaño (10MB)
+    if file.content_type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        raise HTTPException(status_code=400, detail="El archivo debe ser un DOCX.")
+    if file.size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="El archivo no debe exceder los 10MB.")
+
     try:
-        # Verificar si el archivo existe
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo {archivo_entrada} no existe.")
+        # Crear archivo temporal para almacenamiento
+        with NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
+            temp_docx.write(await file.read())
+            temp_docx_path = temp_docx.name
 
-        # Leer el archivo CSV de entrada
-        estudiantes = []
-        with open(archivo_entrada, mode='r', encoding='utf-8') as archivo:
-            lector_csv = csv.reader(archivo)
-            encabezado = next(lector_csv)  # Leer encabezado
-            if encabezado != ['nombre', 'nota1', 'nota2', 'nota3']:
-                raise ValueError("Formato de archivo incorrecto. Encabezado esperado: nombre, nota1, nota2, nota3")
-            
-            for fila in lector_csv:
-                if len(fila) != 4:
-                    raise ValueError("Formato de archivo incorrecto. Cada fila debe tener 4 columnas.")
-                nombre, nota1, nota2, nota3 = fila
-                try:
-                    nota1 = float(nota1)
-                    nota2 = float(nota2)
-                    nota3 = float(nota3)
-                except ValueError:
-                    raise ValueError(f"Notas inválidas para el estudiante {nombre}. Las notas deben ser numéricas.")
-                promedio = (nota1 + nota2 + nota3) / 3
-                estudiantes.append((nombre, promedio))
+        pdf_filename = f"{uuid4().hex}.pdf"
+        pdf_filepath = Path(temp_docx_path).parent / pdf_filename
 
-        # Escribir los resultados en un nuevo archivo CSV
-        with open(archivo_salida, mode='w', encoding='utf-8', newline='') as archivo:
-            escritor_csv = csv.writer(archivo)
-            escritor_csv.writerow(['nombre', 'promedio'])  # Encabezado
-            for nombre, promedio in estudiantes:
-                escritor_csv.writerow([nombre, promedio])
+        # Convertir DOCX a PDF
+        docx_to_pdf(temp_docx_path, pdf_filepath)
 
-        print(f"Promedios calculados y guardados en {archivo_salida}")
+        # Generar hash para el archivo
+        file_hash = hash_file(temp_docx_path)
 
-    except FileNotFoundError as e:
-        print(e)
-    except ValueError as e:
-        print(e)
+        # Guardar información del archivo con detalles
+        files_storage[pdf_filename] = {
+            "file_path": str(pdf_filepath),
+            "hash": file_hash,
+            "expires_in": 3600  # Tiempo en segundos
+        }
+
+        # Borrar archivo después de 1 hora
+        Timer(3600, lambda: clean_up_file(pdf_filename)).start()
+
+        return {"download_url": f"/download/{pdf_filename}"}
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+        raise HTTPException(status_code=500, detail=f"Error procesando el archivo: {str(e)}")
 
-# Ejemplo de uso
-archivo_entrada = "estudiantes.csv"  # Especifica el archivo de entrada
-archivo_salida = "promedios.csv"    # Especifica el archivo de salida
-calcular_promedios(archivo_entrada, archivo_salida)
+
+@app.get("/download/{file_id}")
+async def download_file(file_id: str, auth: AuthToken = Depends(authenticate)):
+    file_info = files_storage.get(file_id)
+    if not file_info or not os.path.exists(file_info["file_path"]):
+        raise HTTPException(status_code=404, detail="El archivo no está disponible o ha expirado.")
+
+    return FileResponse(file_info["file_path"])
+
+
+def docx_to_pdf(docx_path, pdf_path):
+    # Simulación básica de conversión, reemplazar con lógica real
+    from reportlab.pdfgen import canvas
+    c = canvas.Canvas(str(pdf_path))
+    c.drawString(100, 750, "Este es un PDF de demostración para el archivo DOCX.")
+    c.save()
+
+
+def clean_up_file(file_id):
+    file_info = files_storage.pop(file_id, None)
+    if file_info and os.path.exists(file_info["file_path"]):
+        os.remove(file_info["file_path"])
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
