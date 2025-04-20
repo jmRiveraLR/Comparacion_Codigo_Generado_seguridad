@@ -191,3 +191,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+// Compilar: gcc -o buscador buscador.c

@@ -122,3 +122,8 @@ if __name__ == "__main__":
 
     else:
         print("Comando inválido.")
+
+## crear worker y encolar tareas: 
+## python tareas_servicio.py worker high
+## python tareas_servicio.py enqueue high 5 True
+## python tareas_servicio.py enqueue low 20 False
