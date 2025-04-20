@@ -1,44 +1,64 @@
-import csv
+from flask import Flask, request, redirect, render_template_string, make_response
+from flask_wtf import FlaskForm, CSRFProtect
+from wtforms import RadioField, SubmitField
+from wtforms.validators import InputRequired
 import os
 
-def calcular_promedios(archivo_entrada, archivo_salida):
-    estudiantes_promedio = []
+app = Flask(__name__)
+app.secret_key = os.urandom(32)
+csrf = CSRFProtect(app)
 
-    try:
-        # Verifica que el archivo de entrada exista
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo '{archivo_entrada}' no existe.")
+# Opciones de votación
+opciones = ["Python", "JavaScript", "C", "Rust"]
+votos = {opcion: 0 for opcion in opciones}
 
-        with open(archivo_entrada, newline='', encoding='utf-8') as csvfile:
-            lector = csv.DictReader(csvfile)
-            for fila in lector:
-                try:
-                    nombre = fila['nombre']
-                    nota1 = float(fila['nota1'])
-                    nota2 = float(fila['nota2'])
-                    nota3 = float(fila['nota3'])
-                    promedio = round((nota1 + nota2 + nota3) / 3, 2)
-                    estudiantes_promedio.append({'nombre': nombre, 'promedio': promedio})
-                except ValueError as ve:
-                    print(f"Error de formato en notas para {fila.get('nombre', 'desconocido')}: {ve}")
-                except KeyError as ke:
-                    print(f"Columna faltante en archivo CSV: {ke}")
-                    return
+# Formulario protegido con CSRF
+class VotoForm(FlaskForm):
+    voto = RadioField("Voto", choices=[(op, op) for op in opciones], validators=[InputRequired()])
+    submit = SubmitField("Votar")
 
-        # Escribir resultados en archivo de salida
-        with open(archivo_salida, 'w', newline='', encoding='utf-8') as csvfile:
-            campos = ['nombre', 'promedio']
-            escritor = csv.DictWriter(csvfile, fieldnames=campos)
-            escritor.writeheader()
-            escritor.writerows(estudiantes_promedio)
-        print(f"Archivo generado exitosamente en: {archivo_salida}")
+TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head><title>Votación</title></head>
+<body>
+    <h1>Vota por tu lenguaje favorito</h1>
+    {% if ya_votado %}
+        <p>Ya has votado. ¡Gracias!</p>
+        <h2>Resultados:</h2>
+        <ul>
+            {% for opcion, cantidad in votos.items() %}
+                <li>{{ opcion }}: {{ cantidad }} votos</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {% for subfield in form.voto %}
+                <input type="radio" name="{{ form.voto.name }}" value="{{ subfield.data }}" required> {{ subfield.label.text }}<br>
+            {% endfor %}
+            {{ form.submit() }}
+        </form>
+    {% endif %}
+</body>
+</html>
+"""
 
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-    except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+@app.route('/', methods=['GET', 'POST'])
+def votar():
+    form = VotoForm()
+    ya_votado = request.cookies.get('ya_votado')
+    
+    if request.method == 'POST' and form.validate_on_submit() and not ya_votado:
+        voto = form.voto.data
+        if voto in votos:
+            votos[voto] += 1
+        resp = make_response(redirect('/'))
+        # Corrección de cookies inseguras
+        resp.set_cookie('ya_votado', '1', max_age=60*60*24*365, secure=True, httponly=True, samesite='Lax')
+        return resp
 
-# Ejemplo de uso
-entrada = input("Ruta del archivo CSV de entrada: ")
-salida = input("Ruta donde guardar el archivo CSV de salida: ")
-calcular_promedios(entrada, salida)
+    return render_template_string(TEMPLATE, votos=votos, form=form, ya_votado=ya_votado)
+
+if __name__ == '__main__':
+    app.run(debug=False)  # Desactivar debug en producción

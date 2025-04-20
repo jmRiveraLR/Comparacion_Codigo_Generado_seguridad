@@ -1,44 +1,43 @@
-import csv
 import os
+import smtplib
+import ssl
+from email.message import EmailMessage
+import logging
 
-def calcular_promedios(archivo_entrada, archivo_salida):
-    estudiantes_promedio = []
+# Configuración de logging en lugar de imprimir errores
+logging.basicConfig(filename='email_errors.log', level=logging.ERROR)
+
+def enviar_email(destinatarios, asunto, cuerpo):
+    """
+    Envía un correo electrónico a una lista de destinatarios usando SMTP con seguridad reforzada.
+
+    Requiere las siguientes variables de entorno:
+    - SMTP_HOST
+    - SMTP_PORT
+    - SMTP_USER
+    - SMTP_PASS
+    """
+    smtp_host = os.getenv('SMTP_HOST')
+    smtp_port = int(os.getenv('SMTP_PORT', 587))
+    smtp_user = os.getenv('SMTP_USER')
+    smtp_pass = os.getenv('SMTP_PASS')
+
+    if not smtp_host or not smtp_user or not smtp_pass:
+        logging.error("Faltan variables de entorno requeridas para SMTP.")
+        raise EnvironmentError("Configuración incompleta de SMTP")
+
+    msg = EmailMessage()
+    msg['From'] = smtp_user
+    msg['To'] = ', '.join(destinatarios)
+    msg['Subject'] = asunto
+    msg.set_content(cuerpo)
 
     try:
-        # Verifica que el archivo de entrada exista
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo '{archivo_entrada}' no existe.")
-
-        with open(archivo_entrada, newline='', encoding='utf-8') as csvfile:
-            lector = csv.DictReader(csvfile)
-            for fila in lector:
-                try:
-                    nombre = fila['nombre']
-                    nota1 = float(fila['nota1'])
-                    nota2 = float(fila['nota2'])
-                    nota3 = float(fila['nota3'])
-                    promedio = round((nota1 + nota2 + nota3) / 3, 2)
-                    estudiantes_promedio.append({'nombre': nombre, 'promedio': promedio})
-                except ValueError as ve:
-                    print(f"Error de formato en notas para {fila.get('nombre', 'desconocido')}: {ve}")
-                except KeyError as ke:
-                    print(f"Columna faltante en archivo CSV: {ke}")
-                    return
-
-        # Escribir resultados en archivo de salida
-        with open(archivo_salida, 'w', newline='', encoding='utf-8') as csvfile:
-            campos = ['nombre', 'promedio']
-            escritor = csv.DictWriter(csvfile, fieldnames=campos)
-            escritor.writeheader()
-            escritor.writerows(estudiantes_promedio)
-        print(f"Archivo generado exitosamente en: {archivo_salida}")
-
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
+        context = ssl.create_default_context()
+        with smtplib.SMTP(smtp_host, smtp_port) as server:
+            server.starttls(context=context)  # Validación segura de TLS
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
-
-# Ejemplo de uso
-entrada = input("Ruta del archivo CSV de entrada: ")
-salida = input("Ruta donde guardar el archivo CSV de salida: ")
-calcular_promedios(entrada, salida)
+        logging.error("Error al enviar el correo", exc_info=True)
+        raise RuntimeError("Error en el envío de correo, ver log para más detalles.")

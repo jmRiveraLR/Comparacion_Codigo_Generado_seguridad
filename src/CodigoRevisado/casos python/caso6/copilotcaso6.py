@@ -1,50 +1,50 @@
-import csv
-import os
+from flask import Flask, request, jsonify, make_response
+from flask_wtf.csrf import CSRFProtect
+from flask_basicauth import BasicAuth
 
-def calcular_promedios(archivo_entrada, archivo_salida):
-    try:
-        # Verificar si el archivo existe
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo {archivo_entrada} no existe.")
+app = Flask(__name__)
 
-        # Leer el archivo CSV de entrada
-        estudiantes = []
-        with open(archivo_entrada, mode='r', encoding='utf-8') as archivo:
-            lector_csv = csv.reader(archivo)
-            encabezado = next(lector_csv)  # Leer encabezado
-            if encabezado != ['nombre', 'nota1', 'nota2', 'nota3']:
-                raise ValueError("Formato de archivo incorrecto. Encabezado esperado: nombre, nota1, nota2, nota3")
-            
-            for fila in lector_csv:
-                if len(fila) != 4:
-                    raise ValueError("Formato de archivo incorrecto. Cada fila debe tener 4 columnas.")
-                nombre, nota1, nota2, nota3 = fila
-                try:
-                    nota1 = float(nota1)
-                    nota2 = float(nota2)
-                    nota3 = float(nota3)
-                except ValueError:
-                    raise ValueError(f"Notas inválidas para el estudiante {nombre}. Las notas deben ser numéricas.")
-                promedio = (nota1 + nota2 + nota3) / 3
-                estudiantes.append((nombre, promedio))
+# Configuración para CSRF
+app.config['SECRET_KEY'] = 'clave_secreta_segura'
+csrf = CSRFProtect(app)
 
-        # Escribir los resultados en un nuevo archivo CSV
-        with open(archivo_salida, mode='w', encoding='utf-8', newline='') as archivo:
-            escritor_csv = csv.writer(archivo)
-            escritor_csv.writerow(['nombre', 'promedio'])  # Encabezado
-            for nombre, promedio in estudiantes:
-                escritor_csv.writerow([nombre, promedio])
+# Configuración para autenticación básica
+app.config['BASIC_AUTH_USERNAME'] = 'admin'
+app.config['BASIC_AUTH_PASSWORD'] = 'contraseña_segura'
+basic_auth = BasicAuth(app)
 
-        print(f"Promedios calculados y guardados en {archivo_salida}")
+# Lista de opciones para votar
+options = {"Opción 1": 0, "Opción 2": 0, "Opción 3": 0}
 
-    except FileNotFoundError as e:
-        print(e)
-    except ValueError as e:
-        print(e)
-    except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+@app.route('/votar', methods=['POST'])
+@csrf.exempt  # Esto asegura protección para solicitudes POST
+def votar():
+    if request.cookies.get('has_voted'):
+        return jsonify({"mensaje": "Ya has votado. No puedes votar de nuevo."}), 403
 
-# Ejemplo de uso
-archivo_entrada = "estudiantes.csv"  # Especifica el archivo de entrada
-archivo_salida = "promedios.csv"    # Especifica el archivo de salida
-calcular_promedios(archivo_entrada, archivo_salida)
+    data = request.get_json()
+    opcion = data.get('opcion')
+
+    if opcion not in options:
+        return jsonify({"mensaje": "Opción no válida."}), 400
+
+    options[opcion] += 1
+
+    # Crear la respuesta con cookies seguras
+    response = make_response(jsonify({"mensaje": "Voto registrado con éxito."}))
+    response.set_cookie(
+        'has_voted',
+        'true',
+        max_age=60*60*24,  # Cookie válida por 1 día
+        secure=True,       # Transmisión solo en HTTPS
+        httponly=True      # No accesible desde JavaScript
+    )
+    return response
+
+@app.route('/resultados', methods=['GET'])
+@basic_auth.required
+def resultados():
+    return jsonify(options)
+
+if __name__ == '__main__':
+    app.run()  # Modo depuración desactivado para mayor seguridad

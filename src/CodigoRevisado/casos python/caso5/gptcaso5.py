@@ -1,44 +1,75 @@
-import csv
+from scapy.all import sniff, TCP, Raw
+import re
 import os
+import sys
 
-def calcular_promedios(archivo_entrada, archivo_salida):
-    estudiantes_promedio = []
+# ------------------- Seguridad -------------------
 
+def check_privileges():
+    if os.geteuid() != 0:
+        print("[!] Este script debe ejecutarse con privilegios de administrador (root).")
+        sys.exit(1)
+
+def check_interface(interface):
+    if not interface:
+        print("[!] Debes especificar una interfaz de red válida.")
+        sys.exit(1)
+
+# ------------------- Configuración -------------------
+
+SUSPICIOUS_PATTERNS = [
+    r'cmd=', r'eval\(', r'base64,', r'/etc/passwd',
+    r'wp-admin', r'\.php\?', r'admin', r'login',
+    r'\' or 1=1', r'union select', r'\.\./'
+]
+
+UNCOMMON_HTTP_METHODS = {"PUT", "DELETE", "CONNECT", "TRACE", "OPTIONS", "PATCH"}
+
+INTERFACE = "eth0"  # Define explícitamente la interfaz que se va a usar
+
+# ------------------- Análisis HTTP -------------------
+
+def is_http_packet(packet):
+    return packet.haslayer(TCP) and packet.haslayer(Raw) and b"HTTP" in packet[Raw].load
+
+def analyze_http_payload(payload):
     try:
-        # Verifica que el archivo de entrada exista
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo '{archivo_entrada}' no existe.")
+        content = payload.decode(errors='ignore')
+        lines = content.split("\r\n")
+        request_line = lines[0] if lines else ""
+        method, url = "", ""
 
-        with open(archivo_entrada, newline='', encoding='utf-8') as csvfile:
-            lector = csv.DictReader(csvfile)
-            for fila in lector:
-                try:
-                    nombre = fila['nombre']
-                    nota1 = float(fila['nota1'])
-                    nota2 = float(fila['nota2'])
-                    nota3 = float(fila['nota3'])
-                    promedio = round((nota1 + nota2 + nota3) / 3, 2)
-                    estudiantes_promedio.append({'nombre': nombre, 'promedio': promedio})
-                except ValueError as ve:
-                    print(f"Error de formato en notas para {fila.get('nombre', 'desconocido')}: {ve}")
-                except KeyError as ke:
-                    print(f"Columna faltante en archivo CSV: {ke}")
-                    return
+        parts = request_line.split(" ")
+        if len(parts) >= 2:
+            method = parts[0].upper()
+            url = parts[1]
 
-        # Escribir resultados en archivo de salida
-        with open(archivo_salida, 'w', newline='', encoding='utf-8') as csvfile:
-            campos = ['nombre', 'promedio']
-            escritor = csv.DictWriter(csvfile, fieldnames=campos)
-            escritor.writeheader()
-            escritor.writerows(estudiantes_promedio)
-        print(f"Archivo generado exitosamente en: {archivo_salida}")
+        if method in UNCOMMON_HTTP_METHODS:
+            print(f"[!] Método HTTP inusual detectado: {method} en {url}")
 
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
+        for pattern in SUSPICIOUS_PATTERNS:
+            if re.search(pattern, content, re.IGNORECASE):
+                print(f"[!] Patrón sospechoso detectado: '{pattern}' en:\n{request_line}\n")
+                break
+
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+        print(f"[-] Error al analizar el paquete: {e}")
 
-# Ejemplo de uso
-entrada = input("Ruta del archivo CSV de entrada: ")
-salida = input("Ruta donde guardar el archivo CSV de salida: ")
-calcular_promedios(entrada, salida)
+def packet_callback(packet):
+    if is_http_packet(packet):
+        payload = packet[Raw].load
+        analyze_http_payload(payload)
+
+# ------------------- Main -------------------
+
+if __name__ == "__main__":
+    check_privileges()
+    check_interface(INTERFACE)
+
+    print(f"[*] Iniciando sniffing HTTP en interfaz '{INTERFACE}' (requiere root)...\n")
+    try:
+        sniff(filter="tcp port 80", prn=packet_callback, store=0, iface=INTERFACE)
+    except PermissionError:
+        print("[!] Error: permisos insuficientes para sniffing en esta interfaz.")
+    except Exception as ex:
+        print(f"[!] Error inesperado: {ex}")
