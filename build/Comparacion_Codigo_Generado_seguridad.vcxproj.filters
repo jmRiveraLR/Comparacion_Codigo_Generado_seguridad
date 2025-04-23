@@ -22,6 +22,51 @@
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\seekcaso1.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\chatgptcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\copilotcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\seekcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\chatgptcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\copilotcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\seekcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\chatgptcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\copilotcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\seekcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\chatgptcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\copilotcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\seekcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\chatgptcaso14.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\copilotcaso14.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\seekcaso14.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\chatgptcaso2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +85,60 @@
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\seekcaso3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\chatgptcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\copilotcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\seekcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\chatgptcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\copilotcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\seekcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\chatgptcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\copilotcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\seekcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\chatgptcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\copilotcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\seekcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\chatgptcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\copilotcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\seekcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\chatgptcaso9.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\copilotcaso9.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\seekcaso9.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\chatgpt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,6 +146,51 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\deepseek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\chatgptcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\copilotcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\seekcaso10.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\chatgptcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\copilotcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\seekcaso11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\chatgptcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\copilotcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\seekcaso12.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\chatgptcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\copilotcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\seekcaso13.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\chatgptcaso14.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\copilotcaso14.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\seekcaso14.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\chatgptcaso2.c">
@@ -65,6 +209,60 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\seekcaso3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\chatgptcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\copilotcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\seekcaso4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\chatgptcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\copilotcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\seekcaso5.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\chatgptcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\copilotcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\seekcaso6.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\chatgptcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\copilotcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\seekcaso7.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\chatgptcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\copilotcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\seekcaso8.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\chatgptcaso9.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\copilotcaso9.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\seekcaso9.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
