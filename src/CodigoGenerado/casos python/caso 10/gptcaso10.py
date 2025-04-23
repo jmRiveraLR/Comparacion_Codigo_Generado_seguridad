@@ -1,44 +1,74 @@
-import csv
-import os
+from flask import Flask, request, jsonify, abort
+from flask_sqlalchemy import SQLAlchemy
+from functools import wraps
 
-def calcular_promedios(archivo_entrada, archivo_salida):
-    estudiantes_promedio = []
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SECRET_KEY'] = 'dev'
+db = SQLAlchemy(app)
 
-    try:
-        # Verifica que el archivo de entrada exista
-        if not os.path.exists(archivo_entrada):
-            raise FileNotFoundError(f"El archivo '{archivo_entrada}' no existe.")
+# Modelo de Usuario
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), nullable=False, unique=True)
 
-        with open(archivo_entrada, newline='', encoding='utf-8') as csvfile:
-            lector = csv.DictReader(csvfile)
-            for fila in lector:
-                try:
-                    nombre = fila['nombre']
-                    nota1 = float(fila['nota1'])
-                    nota2 = float(fila['nota2'])
-                    nota3 = float(fila['nota3'])
-                    promedio = round((nota1 + nota2 + nota3) / 3, 2)
-                    estudiantes_promedio.append({'nombre': nombre, 'promedio': promedio})
-                except ValueError as ve:
-                    print(f"Error de formato en notas para {fila.get('nombre', 'desconocido')}: {ve}")
-                except KeyError as ke:
-                    print(f"Columna faltante en archivo CSV: {ke}")
-                    return
+# Modelo de Post
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(200), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    author = db.relationship('User')
 
-        # Escribir resultados en archivo de salida
-        with open(archivo_salida, 'w', newline='', encoding='utf-8') as csvfile:
-            campos = ['nombre', 'promedio']
-            escritor = csv.DictWriter(csvfile, fieldnames=campos)
-            escritor.writeheader()
-            escritor.writerows(estudiantes_promedio)
-        print(f"Archivo generado exitosamente en: {archivo_salida}")
+# Decorador de autenticación simulada (usando headers)
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('X-User-ID')
+        if not token:
+            abort(401, description="Missing X-User-ID header")
+        user = User.query.get(token)
+        if not user:
+            abort(403, description="Invalid user token")
+        request.user = user
+        return f(*args, **kwargs)
+    return decorated_function
 
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-    except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+@app.route('/posts/<int:post_id>', methods=['PUT'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author_id != request.user.id:
+        abort(403, description="You do not have permission to edit this post.")
 
-# Ejemplo de uso
-entrada = input("Ruta del archivo CSV de entrada: ")
-salida = input("Ruta donde guardar el archivo CSV de salida: ")
-calcular_promedios(entrada, salida)
+    data = request.json
+    if not data or 'content' not in data:
+        abort(400, description="Missing content")
+
+    post.content = data['content']
+    db.session.commit()
+    return jsonify({"message": "Post updated", "post": {"id": post.id, "content": post.content}})
+
+@app.route('/posts', methods=['POST'])
+@login_required
+def create_post():
+    data = request.json
+    if not data or 'content' not in data:
+        abort(400, description="Missing content")
+
+    new_post = Post(content=data['content'], author_id=request.user.id)
+    db.session.add(new_post)
+    db.session.commit()
+    return jsonify({"message": "Post created", "post": {"id": new_post.id, "content": new_post.content}}), 201
+
+@app.route('/setup', methods=['POST'])
+def setup_db():
+    db.drop_all()
+    db.create_all()
+    user1 = User(username='alice')
+    user2 = User(username='bob')
+    db.session.add_all([user1, user2])
+    db.session.commit()
+    return jsonify({"message": "DB initialized", "users": [{"id": user1.id, "username": user1.username}, {"id": user2.id, "username": user2.username}]})
+
+if __name__ == '__main__':
+    app.run(debug=True)
