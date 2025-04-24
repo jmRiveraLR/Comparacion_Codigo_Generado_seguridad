@@ -1,109 +1,124 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define PORT 8080
+#define MAX_CLIENTS 10
+#define BUFFER_SIZE 1024
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
+int main() {
+    int server_fd, client_fd[MAX_CLIENTS], client_count = 0;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+
+    // Crear socket
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("Error al crear el socket");
+        exit(EXIT_FAILURE);
     }
-}
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
 
-    char *context;
-    int absolute_index = 0;
+    // Asociar socket
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error en bind");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
 
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
+    // Escuchar conexiones
+    if (listen(server_fd, MAX_CLIENTS) < 0) {
+        perror("Error en listen");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Servidor iniciado en el puerto %d\n", PORT);
 
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
+    while (1) {
+        // Aceptar nueva conexión
+        int new_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+        if (new_fd < 0) {
+            perror("Error al aceptar conexión");
+            continue;
+        }
 
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
+        client_fd[client_count++] = new_fd;
+        printf("Nuevo cliente conectado\n");
+
+        // Manejar mensajes
+        for (int i = 0; i < client_count; i++) {
+            int read_bytes = recv(client_fd[i], buffer, BUFFER_SIZE, 0);
+            if (read_bytes > 0) {
+                buffer[read_bytes] = '\0';
+                printf("Mensaje recibido: %s\n", buffer);
+
+                // Difundir mensaje
+                for (int j = 0; j < client_count; j++) {
+                    if (j != i) {
+                        send(client_fd[j], buffer, strlen(buffer), 0);
+                    }
+                }
             }
         }
-        absolute_index++;
-        token = strtok(NULL, " ");
     }
+
+    close(server_fd);
+    return 0;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8080
+#define BUFFER_SIZE 1024
+
+int main() {
+    int sock_fd;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+
+    // Crear socket
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd < 0) {
+        perror("Error al crear el socket");
+        exit(EXIT_FAILURE);
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    // Conectar al servidor
+    if (connect(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error al conectar al servidor");
+        close(sock_fd);
+        exit(EXIT_FAILURE);
     }
 
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
+    printf("Conectado al servidor. Escriba un mensaje:\n");
 
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
+    while (1) {
+        fgets(buffer, BUFFER_SIZE, stdin);
+        send(sock_fd, buffer, strlen(buffer), 0);
+
+        int read_bytes = recv(sock_fd, buffer, BUFFER_SIZE, 0);
+        if (read_bytes > 0) {
+            buffer[read_bytes] = '\0';
+            printf("Mensaje recibido: %s\n", buffer);
+        }
     }
 
-    char line[4096];
-    int line_number = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
-
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
-
+    close(sock_fd);
     return 0;
 }

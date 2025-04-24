@@ -1,109 +1,104 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sqlite3.h>
 #include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define MAX_LINE 1024
+#define SKU_LENGTH 10
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
-    }
+// Función para validar que el precio es positivo
+int validar_precio(double precio) {
+    return precio > 0;
 }
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
-
-    char *context;
-    int absolute_index = 0;
-
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
-
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
-
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
-            }
+// Función para validar que el SKU tiene un formato válido (longitud exacta y alfanumérico)
+int validar_sku(const char *sku) {
+    if (strlen(sku) != SKU_LENGTH) {
+        return 0;
+    }
+    for (int i = 0; i < SKU_LENGTH; i++) {
+        if (!isalnum(sku[i])) {
+            return 0;
         }
-        absolute_index++;
-        token = strtok(NULL, " ");
+    }
+    return 1;
+}
+
+// Función para cargar datos a la base de datos
+void cargar_en_db(sqlite3 *db, const char *nombre, double precio, const char *sku) {
+    char *error_msg = NULL;
+    char sql[MAX_LINE];
+
+    snprintf(sql, sizeof(sql),
+             "INSERT INTO productos (nombre, precio, sku) VALUES ('%s', %f, '%s');",
+             nombre, precio, sku);
+
+    if (sqlite3_exec(db, sql, 0, 0, &error_msg) != SQLITE_OK) {
+        fprintf(stderr, "Error al insertar en la base de datos: %s\n", error_msg);
+        sqlite3_free(error_msg);
     }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
-    }
-
-    FILE *file = fopen(argv[1], "r");
+// Función principal para leer el archivo CSV
+void leer_csv_y_cargar(const char *archivo_csv, sqlite3 *db) {
+    FILE *file = fopen(archivo_csv, "r");
     if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
+        perror("Error al abrir el archivo");
+        return;
     }
 
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
-
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
-
-    char line[4096];
-    int line_number = 0;
-
+    char line[MAX_LINE];
     while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
+        char *nombre = strtok(line, ",");
+        char *precio_str = strtok(NULL, ",");
+        char *sku = strtok(NULL, ",\n");
+
+        if (!nombre || !precio_str || !sku) {
+            fprintf(stderr, "Línea malformada: %s\n", line);
+            continue;
+        }
+
+        double precio = atof(precio_str);
+        if (!validar_precio(precio)) {
+            fprintf(stderr, "Precio inválido para producto '%s': %f\n", nombre, precio);
+            continue;
+        }
+
+        if (!validar_sku(sku)) {
+            fprintf(stderr, "SKU inválido para producto '%s': %s\n", nombre, sku);
+            continue;
+        }
+
+        cargar_en_db(db, nombre, precio, sku);
     }
 
     fclose(file);
+}
 
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
+int main() {
+    sqlite3 *db;
+    if (sqlite3_open("productos.db", &db)) {
+        fprintf(stderr, "No se pudo abrir la base de datos: %s\n", sqlite3_errmsg(db));
+        return 1;
     }
 
-    free(keyword_info);
+    const char *sql = "CREATE TABLE IF NOT EXISTS productos ("
+                      "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      "nombre TEXT NOT NULL,"
+                      "precio REAL NOT NULL,"
+                      "sku TEXT NOT NULL UNIQUE);";
 
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
+    char *error_msg = NULL;
+    if (sqlite3_exec(db, sql, 0, 0, &error_msg) != SQLITE_OK) {
+        fprintf(stderr, "Error al crear la tabla: %s\n", error_msg);
+        sqlite3_free(error_msg);
+        sqlite3_close(db);
+        return 1;
     }
 
-    json_object_put(output);
+    leer_csv_y_cargar("productos.csv", db);
 
+    sqlite3_close(db);
     return 0;
 }

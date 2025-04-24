@@ -1,109 +1,57 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <microhttpd.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
+#include <jansson.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define PORT 8888
+#define AUTHORIZED_HOST "payments.example.com"
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
+int process_request(void *cls, struct MHD_Connection *connection,
+                    const char *url, const char *method, const char *version,
+                    const char *upload_data, size_t *upload_data_size, void **con_cls) {
+    if (strcmp(method, "POST") != 0) {
+        return MHD_NO; // Solo aceptamos solicitudes POST
     }
-}
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
+    const char *host_header = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Host");
+    if (!host_header || strcmp(host_header, AUTHORIZED_HOST) != 0) {
+        return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, NULL);
+    }
 
-    char *context;
-    int absolute_index = 0;
-
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
-
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
-
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
-            }
+    if (*upload_data_size > 0) {
+        // Parsear el JSON en el cuerpo de la solicitud
+        json_error_t error;
+        json_t *json_data = json_loads(upload_data, 0, &error);
+        if (!json_data) {
+            return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, NULL);
         }
-        absolute_index++;
-        token = strtok(NULL, " ");
+
+        // Procesar datos del JSON (ejemplo)
+        const char *payment_status = json_string_value(json_object_get(json_data, "status"));
+        if (payment_status && strcmp(payment_status, "completed") == 0) {
+            printf("Pago completado exitosamente.\n");
+        } else {
+            printf("Estado del pago no válido.\n");
+        }
+
+        json_decref(json_data);
+        *upload_data_size = 0;
     }
+
+    return MHD_queue_response(connection, MHD_HTTP_OK, NULL);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
+int main() {
+    struct MHD_Daemon *daemon;
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL, 
+                              &process_request, NULL, MHD_OPTION_END);
+    if (!daemon) {
+        printf("Error al iniciar el servidor HTTP.\n");
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
-
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
-
-    char line[4096];
-    int line_number = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
-
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
+    printf("Webhook corriendo en el puerto %d\n", PORT);
+    getchar(); // Para mantener el servidor corriendo
+    MHD_stop_daemon(daemon);
 
     return 0;
 }

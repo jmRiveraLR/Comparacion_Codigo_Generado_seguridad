@@ -1,195 +1,106 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include "uthash.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/select.h>
 
-#define MAX_LINE_LEN 8192
-#define CONTEXT_WORDS 10
+#define PORT 12345
+#define MAX_CLIENTS 10
+#define BUFFER_SIZE 1024
 
-typedef struct Context {
-    size_t line_number;
-    size_t absolute_index;
-    char *context_text;
-    struct Context *next;
-} Context;
+int main() {
+    int listener, newfd, fdmax, i, j, nbytes;
+    char buffer[BUFFER_SIZE];
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addrlen;
+    fd_set master_set, read_fds;
 
-typedef struct KeywordInfo {
-    char *keyword;
-    size_t frequency;
-    Context *contexts;
-    UT_hash_handle hh;
-} KeywordInfo;
-
-KeywordInfo *keywords_table = NULL;
-
-void add_context(KeywordInfo *kw_info, size_t line_number, size_t abs_index, const char *context_text) {
-    Context *ctx = malloc(sizeof(Context));
-    ctx->line_number = line_number;
-    ctx->absolute_index = abs_index;
-    ctx->context_text = strdup(context_text);
-    ctx->next = kw_info->contexts;
-    kw_info->contexts = ctx;
-}
-
-void to_lower_str(char *str) {
-    for (; *str; ++str) *str = tolower(*str);
-}
-
-void tokenize_line(const char *line, char **tokens, int *token_count) {
-    char *copy = strdup(line);
-    char *token = strtok(copy, " \t\n\r");
-    *token_count = 0;
-
-    while (token && *token_count < MAX_LINE_LEN) {
-        tokens[(*token_count)++] = token;
-        token = strtok(NULL, " \t\n\r");
-    }
-}
-
-char *build_context(char **words, int total, int center, int before, int after) {
-    int start = center - before < 0 ? 0 : center - before;
-    int end = center + after >= total ? total - 1 : center + after;
-    size_t length = 0;
-
-    for (int i = start; i <= end; ++i) {
-        length += strlen(words[i]) + 1;
+    // Crear socket TCP
+    if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(EXIT_FAILURE);
     }
 
-    char *context = malloc(length + 1);
-    context[0] = '\0';
+    // Configurar dirección del servidor
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+    memset(&(server_addr.sin_zero), '\0', 8);
 
-    for (int i = start; i <= end; ++i) {
-        strcat(context, words[i]);
-        if (i != end) strcat(context, " ");
+    // Asociar socket
+    if (bind(listener, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("bind");
+        exit(EXIT_FAILURE);
     }
 
-    return context;
-}
-
-void process_line(char *line, size_t line_number, size_t *abs_index) {
-    char *tokens[MAX_LINE_LEN];
-    int token_count = 0;
-    tokenize_line(line, tokens, &token_count);
-
-    for (int i = 0; i < token_count; ++i) {
-        char word[256];
-        strncpy(word, tokens[i], 255);
-        word[255] = '\0';
-        to_lower_str(word);
-
-        KeywordInfo *kw_info;
-        HASH_FIND_STR(keywords_table, word, kw_info);
-        if (kw_info) {
-            kw_info->frequency++;
-
-            char *ctx_text = build_context(tokens, token_count, i, CONTEXT_WORDS, CONTEXT_WORDS);
-            add_context(kw_info, line_number, *abs_index + (tokens[i] - line), ctx_text);
-            free(ctx_text);
-        }
+    // Escuchar conexiones
+    if (listen(listener, MAX_CLIENTS) == -1) {
+        perror("listen");
+        exit(EXIT_FAILURE);
     }
 
-    *abs_index += strlen(line);
-}
+    // Inicializar conjuntos de descriptores
+    FD_ZERO(&master_set);
+    FD_ZERO(&read_fds);
+    FD_SET(listener, &master_set);
+    fdmax = listener;
 
-void export_json(const char *filename) {
-    FILE *out = fopen(filename, "w");
-    if (!out) {
-        perror("Error creating JSON file");
-        return;
-    }
+    printf("Servidor listo en el puerto %d...\n", PORT);
 
-    fprintf(out, "{\n");
-
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        fprintf(out, "  \"%s\": {\n", kw->keyword);
-        fprintf(out, "    \"frequency\": %zu,\n", kw->frequency);
-        fprintf(out, "    \"contexts\": [\n");
-
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            fprintf(out,
-                    "      {\"line\": %zu, \"index\": %zu, \"context\": \"%s\"}%s\n",
-                    ctx->line_number,
-                    ctx->absolute_index,
-                    ctx->context_text,
-                    ctx->next ? "," : "");
-            ctx = ctx->next;
+    // Bucle principal
+    for (;;) {
+        read_fds = master_set;
+        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
+            perror("select");
+            exit(EXIT_FAILURE);
         }
 
-        fprintf(out, "    ]\n");
-        fprintf(out, "  }%s\n", tmp->hh.next ? "," : "");
-    }
-
-    fprintf(out, "}\n");
-    fclose(out);
-}
-
-void add_keyword(const char *keyword) {
-    KeywordInfo *kw = malloc(sizeof(KeywordInfo));
-    kw->keyword = strdup(keyword);
-    to_lower_str(kw->keyword);
-    kw->frequency = 0;
-    kw->contexts = NULL;
-    HASH_ADD_KEYPTR(hh, keywords_table, kw->keyword, strlen(kw->keyword), kw);
-}
-
-void free_all() {
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            Context *tmp_ctx = ctx;
-            ctx = ctx->next;
-            free(tmp_ctx->context_text);
-            free(tmp_ctx);
+        for (i = 0; i <= fdmax; i++) {
+            if (FD_ISSET(i, &read_fds)) {
+                if (i == listener) {
+                    // Nueva conexión
+                    addrlen = sizeof(client_addr);
+                    if ((newfd = accept(listener, (struct sockaddr *)&client_addr, &addrlen)) == -1) {
+                        perror("accept");
+                    } else {
+                        FD_SET(newfd, &master_set);
+                        if (newfd > fdmax) fdmax = newfd;
+                        printf("Nueva conexión desde %s en socket %d\n",
+                               inet_ntoa(client_addr.sin_addr), newfd);
+                    }
+                } else {
+                    // Datos desde un cliente
+                    if ((nbytes = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
+                        if (nbytes == 0) {
+                            printf("Socket %d desconectado\n", i);
+                        } else {
+                            perror("recv");
+                        }
+                        close(i);
+                        FD_CLR(i, &master_set);
+                    } else {
+                        // Difundir mensaje
+                        buffer[nbytes] = '\0';
+                        printf("Mensaje de %d: %s", i, buffer);
+                        for (j = 0; j <= fdmax; j++) {
+                            if (FD_ISSET(j, &master_set)) {
+                                if (j != listener && j != i) {
+                                    if (send(j, buffer, nbytes, 0) == -1) {
+                                        perror("send");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        HASH_DEL(keywords_table, kw);
-        free(kw->keyword);
-        free(kw);
     }
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s archivo.txt salida.json palabra1 palabra2 ...\n", argv[0]);
-        return 1;
-    }
-
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    const char *output_json = argv[2];
-    for (int i = 3; i < argc; i++) {
-        add_keyword(argv[i]);
-    }
-
-    char *line = NULL;
-    size_t len = 0;
-    size_t line_number = 1;
-    size_t abs_index = 0;
-
-    while (getline(&line, &len, file) != -1) {
-        process_line(line, line_number++, &abs_index);
-    }
-
-    fclose(file);
-    free(line);
-
-    export_json(output_json);
-    free_all();
 
     return 0;
 }
-
-// Compilar: gcc -o buscador buscador.c

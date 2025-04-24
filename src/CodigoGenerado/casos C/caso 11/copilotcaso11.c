@@ -1,109 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define BUFFER_SIZE 1024
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
+void copy_file(const char *source, const char *destination) {
+    FILE *src_file = fopen(source, "rb");
+    if (!src_file) {
+        perror("Error al abrir el archivo fuente");
+        exit(EXIT_FAILURE);
     }
+
+    FILE *dest_file = fopen(destination, "wb");
+    if (!dest_file) {
+        perror("Error al crear el archivo de destino");
+        fclose(src_file);
+        exit(EXIT_FAILURE);
+    }
+
+    char buffer[BUFFER_SIZE];
+    size_t bytes_read;
+
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, src_file)) > 0) {
+        fwrite(buffer, 1, bytes_read, dest_file);
+    }
+
+    fclose(src_file);
+    fclose(dest_file);
 }
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
-
-    char *context;
-    int absolute_index = 0;
-
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
-
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
-
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
-            }
-        }
-        absolute_index++;
-        token = strtok(NULL, " ");
-    }
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
+int main() {
+    char ruta[BUFFER_SIZE];
+    printf("Introduce la ruta absoluta del archivo:\n");
+    if (fgets(ruta, BUFFER_SIZE, stdin) == NULL) {
+        perror("Error al leer la entrada");
+        exit(EXIT_FAILURE);
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
+    // Eliminar el salto de línea al final de la entrada
+    ruta[strcspn(ruta, "\n")] = '\0';
 
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
+    const char *respaldo_dir = "respaldo/";
+    char destino[BUFFER_SIZE];
 
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
+    snprintf(destino, BUFFER_SIZE, "%s%s", respaldo_dir, strrchr(ruta, '/') + 1);
 
-    char line[4096];
-    int line_number = 0;
+    copy_file(ruta, destino);
 
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
-
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
-
+    printf("Archivo copiado exitosamente a %s\n", destino);
     return 0;
 }
