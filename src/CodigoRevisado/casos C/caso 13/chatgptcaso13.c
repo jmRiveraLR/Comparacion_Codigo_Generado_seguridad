@@ -1,195 +1,146 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "uthash.h"
+#include <errno.h>
 
-#define MAX_LINE_LEN 8192
-#define CONTEXT_WORDS 10
+#define MAX_REGISTROS 100
+#define ARCHIVO_DATOS "datos.bin"
+#define MAX_NOMBRE 50
 
-typedef struct Context {
-    size_t line_number;
-    size_t absolute_index;
-    char *context_text;
-    struct Context *next;
-} Context;
+typedef struct {
+    int id;
+    char nombre[MAX_NOMBRE];
+    int estatus;
+} Registro;
 
-typedef struct KeywordInfo {
-    char *keyword;
-    size_t frequency;
-    Context *contexts;
-    UT_hash_handle hh;
-} KeywordInfo;
+Registro baseDatos[MAX_REGISTROS];
+int totalRegistros = 0;
 
-KeywordInfo *keywords_table = NULL;
-
-void add_context(KeywordInfo *kw_info, size_t line_number, size_t abs_index, const char *context_text) {
-    Context *ctx = malloc(sizeof(Context));
-    ctx->line_number = line_number;
-    ctx->absolute_index = abs_index;
-    ctx->context_text = strdup(context_text);
-    ctx->next = kw_info->contexts;
-    kw_info->contexts = ctx;
+void limpiarBufferEntrada() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
 }
 
-void to_lower_str(char *str) {
-    for (; *str; ++str) *str = tolower(*str);
+int leerEnteroSeguro(const char *mensaje) {
+    int valor;
+    printf("%s", mensaje);
+    while (scanf("%d", &valor) != 1) {
+        printf("Entrada inválida. Intente de nuevo: ");
+        limpiarBufferEntrada();
+    }
+    limpiarBufferEntrada();
+    return valor;
 }
 
-void tokenize_line(const char *line, char **tokens, int *token_count) {
-    char *copy = strdup(line);
-    char *token = strtok(copy, " \t\n\r");
-    *token_count = 0;
-
-    while (token && *token_count < MAX_LINE_LEN) {
-        tokens[(*token_count)++] = token;
-        token = strtok(NULL, " \t\n\r");
+void leerCadenaSegura(char *buffer, size_t tamaño, const char *mensaje) {
+    printf("%s", mensaje);
+    if (fgets(buffer, tamaño, stdin)) {
+        buffer[strcspn(buffer, "\n")] = '\0'; // remover salto de línea
+    } else {
+        buffer[0] = '\0';
     }
 }
 
-char *build_context(char **words, int total, int center, int before, int after) {
-    int start = center - before < 0 ? 0 : center - before;
-    int end = center + after >= total ? total - 1 : center + after;
-    size_t length = 0;
-
-    for (int i = start; i <= end; ++i) {
-        length += strlen(words[i]) + 1;
+void cargarDatos() {
+    FILE *archivo = fopen(ARCHIVO_DATOS, "rb");
+    if (archivo) {
+        if (fread(&totalRegistros, sizeof(int), 1, archivo) != 1) totalRegistros = 0;
+        fread(baseDatos, sizeof(Registro), totalRegistros, archivo);
+        fclose(archivo);
     }
-
-    char *context = malloc(length + 1);
-    context[0] = '\0';
-
-    for (int i = start; i <= end; ++i) {
-        strcat(context, words[i]);
-        if (i != end) strcat(context, " ");
-    }
-
-    return context;
 }
 
-void process_line(char *line, size_t line_number, size_t *abs_index) {
-    char *tokens[MAX_LINE_LEN];
-    int token_count = 0;
-    tokenize_line(line, tokens, &token_count);
-
-    for (int i = 0; i < token_count; ++i) {
-        char word[256];
-        strncpy(word, tokens[i], 255);
-        word[255] = '\0';
-        to_lower_str(word);
-
-        KeywordInfo *kw_info;
-        HASH_FIND_STR(keywords_table, word, kw_info);
-        if (kw_info) {
-            kw_info->frequency++;
-
-            char *ctx_text = build_context(tokens, token_count, i, CONTEXT_WORDS, CONTEXT_WORDS);
-            add_context(kw_info, line_number, *abs_index + (tokens[i] - line), ctx_text);
-            free(ctx_text);
-        }
+void guardarDatos() {
+    FILE *archivo = fopen(ARCHIVO_DATOS, "wb");
+    if (archivo) {
+        fwrite(&totalRegistros, sizeof(int), 1, archivo);
+        fwrite(baseDatos, sizeof(Registro), totalRegistros, archivo);
+        fclose(archivo);
+    } else {
+        fprintf(stderr, "Error al guardar datos: %s\n", strerror(errno));
     }
-
-    *abs_index += strlen(line);
 }
 
-void export_json(const char *filename) {
-    FILE *out = fopen(filename, "w");
-    if (!out) {
-        perror("Error creating JSON file");
+void mostrarMenu() {
+    printf("\n--- Menú ---\n");
+    printf("1. Agregar registro\n");
+    printf("2. Editar registro\n");
+    printf("3. Eliminar registro\n");
+    printf("4. Mostrar registros\n");
+    printf("0. Salir y guardar\n");
+}
+
+void agregarRegistro() {
+    if (totalRegistros >= MAX_REGISTROS) {
+        printf("Base de datos llena.\n");
         return;
     }
 
-    fprintf(out, "{\n");
+    Registro nuevo;
+    nuevo.id = leerEnteroSeguro("Ingrese ID: ");
+    leerCadenaSegura(nuevo.nombre, sizeof(nuevo.nombre), "Ingrese nombre: ");
+    nuevo.estatus = leerEnteroSeguro("Ingrese estatus (1=activo, 0=inactivo): ");
 
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        fprintf(out, "  \"%s\": {\n", kw->keyword);
-        fprintf(out, "    \"frequency\": %zu,\n", kw->frequency);
-        fprintf(out, "    \"contexts\": [\n");
+    baseDatos[totalRegistros++] = nuevo;
+    printf("Registro agregado.\n");
+}
 
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            fprintf(out,
-                    "      {\"line\": %zu, \"index\": %zu, \"context\": \"%s\"}%s\n",
-                    ctx->line_number,
-                    ctx->absolute_index,
-                    ctx->context_text,
-                    ctx->next ? "," : "");
-            ctx = ctx->next;
+void editarRegistro() {
+    int id = leerEnteroSeguro("Ingrese ID del registro a editar: ");
+
+    for (int i = 0; i < totalRegistros; i++) {
+        if (baseDatos[i].id == id) {
+            printf("Editar nombre actual (%s):\n", baseDatos[i].nombre);
+            leerCadenaSegura(baseDatos[i].nombre, sizeof(baseDatos[i].nombre), "Nuevo nombre: ");
+            baseDatos[i].estatus = leerEnteroSeguro("Nuevo estatus (1=activo, 0=inactivo): ");
+            printf("Registro actualizado.\n");
+            return;
         }
-
-        fprintf(out, "    ]\n");
-        fprintf(out, "  }%s\n", tmp->hh.next ? "," : "");
     }
-
-    fprintf(out, "}\n");
-    fclose(out);
+    printf("Registro no encontrado.\n");
 }
 
-void add_keyword(const char *keyword) {
-    KeywordInfo *kw = malloc(sizeof(KeywordInfo));
-    kw->keyword = strdup(keyword);
-    to_lower_str(kw->keyword);
-    kw->frequency = 0;
-    kw->contexts = NULL;
-    HASH_ADD_KEYPTR(hh, keywords_table, kw->keyword, strlen(kw->keyword), kw);
-}
+void eliminarRegistro() {
+    int id = leerEnteroSeguro("Ingrese ID del registro a eliminar: ");
 
-void free_all() {
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            Context *tmp_ctx = ctx;
-            ctx = ctx->next;
-            free(tmp_ctx->context_text);
-            free(tmp_ctx);
+    for (int i = 0; i < totalRegistros; i++) {
+        if (baseDatos[i].id == id) {
+            for (int j = i; j < totalRegistros - 1; j++) {
+                baseDatos[j] = baseDatos[j + 1];
+            }
+            totalRegistros--;
+            printf("Registro eliminado.\n");
+            return;
         }
-        HASH_DEL(keywords_table, kw);
-        free(kw->keyword);
-        free(kw);
+    }
+    printf("Registro no encontrado.\n");
+}
+
+void mostrarRegistros() {
+    printf("\n--- Registros ---\n");
+    for (int i = 0; i < totalRegistros; i++) {
+        printf("ID: %d | Nombre: %s | Estatus: %d\n",
+               baseDatos[i].id, baseDatos[i].nombre, baseDatos[i].estatus);
     }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s archivo.txt salida.json palabra1 palabra2 ...\n", argv[0]);
-        return 1;
-    }
+int main() {
+    cargarDatos();
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
+    int opcion;
+    do {
+        mostrarMenu();
+        opcion = leerEnteroSeguro("Elija una opción: ");
 
-    const char *output_json = argv[2];
-    for (int i = 3; i < argc; i++) {
-        add_keyword(argv[i]);
-    }
-
-    char *line = NULL;
-    size_t len = 0;
-    size_t line_number = 1;
-    size_t abs_index = 0;
-
-    while (getline(&line, &len, file) != -1) {
-        process_line(line, line_number++, &abs_index);
-    }
-
-    fclose(file);
-    free(line);
-
-    export_json(output_json);
-    free_all();
+        switch (opcion) {
+            case 1: agregarRegistro(); break;
+            case 2: editarRegistro(); break;
+            case 3: eliminarRegistro(); break;
+            case 4: mostrarRegistros(); break;
+            case 0: guardarDatos(); printf("Saliendo...\n"); break;
+            default: printf("Opción no válida.\n");
+        }
+    } while (opcion != 0);
 
     return 0;
 }
-
-// Compilar: gcc -o buscador buscador.c

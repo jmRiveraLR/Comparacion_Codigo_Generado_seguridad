@@ -1,195 +1,169 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
+#include <jpeglib.h>
+#include <errno.h>
 #include <sys/stat.h>
-#include "uthash.h"
 
-#define MAX_LINE_LEN 8192
-#define CONTEXT_WORDS 10
+#pragma pack(push, 1)
+typedef struct {
+    unsigned short bfType;
+    unsigned int bfSize;
+    unsigned short bfReserved1;
+    unsigned short bfReserved2;
+    unsigned int bfOffBits;
+} BITMAPFILEHEADER;
 
-typedef struct Context {
-    size_t line_number;
-    size_t absolute_index;
-    char *context_text;
-    struct Context *next;
-} Context;
+typedef struct {
+    unsigned int biSize;
+    int          biWidth;
+    int          biHeight;
+    unsigned short biPlanes;
+    unsigned short biBitCount;
+    unsigned int biCompression;
+    unsigned int biSizeImage;
+    int          biXPelsPerMeter;
+    int          biYPelsPerMeter;
+    unsigned int biClrUsed;
+    unsigned int biClrImportant;
+} BITMAPINFOHEADER;
+#pragma pack(pop)
 
-typedef struct KeywordInfo {
-    char *keyword;
-    size_t frequency;
-    Context *contexts;
-    UT_hash_handle hh;
-} KeywordInfo;
-
-KeywordInfo *keywords_table = NULL;
-
-void add_context(KeywordInfo *kw_info, size_t line_number, size_t abs_index, const char *context_text) {
-    Context *ctx = malloc(sizeof(Context));
-    ctx->line_number = line_number;
-    ctx->absolute_index = abs_index;
-    ctx->context_text = strdup(context_text);
-    ctx->next = kw_info->contexts;
-    kw_info->contexts = ctx;
+// Validación de archivo regular
+int is_regular_file(const char *path) {
+    struct stat st;
+    if (stat(path, &st) != 0) return 0;
+    return S_ISREG(st.st_mode);
 }
 
-void to_lower_str(char *str) {
-    for (; *str; ++str) *str = tolower(*str);
-}
-
-void tokenize_line(const char *line, char **tokens, int *token_count) {
-    char *copy = strdup(line);
-    char *token = strtok(copy, " \t\n\r");
-    *token_count = 0;
-
-    while (token && *token_count < MAX_LINE_LEN) {
-        tokens[(*token_count)++] = token;
-        token = strtok(NULL, " \t\n\r");
-    }
-}
-
-char *build_context(char **words, int total, int center, int before, int after) {
-    int start = center - before < 0 ? 0 : center - before;
-    int end = center + after >= total ? total - 1 : center + after;
-    size_t length = 0;
-
-    for (int i = start; i <= end; ++i) {
-        length += strlen(words[i]) + 1;
-    }
-
-    char *context = malloc(length + 1);
-    context[0] = '\0';
-
-    for (int i = start; i <= end; ++i) {
-        strcat(context, words[i]);
-        if (i != end) strcat(context, " ");
-    }
-
-    return context;
-}
-
-void process_line(char *line, size_t line_number, size_t *abs_index) {
-    char *tokens[MAX_LINE_LEN];
-    int token_count = 0;
-    tokenize_line(line, tokens, &token_count);
-
-    for (int i = 0; i < token_count; ++i) {
-        char word[256];
-        strncpy(word, tokens[i], 255);
-        word[255] = '\0';
-        to_lower_str(word);
-
-        KeywordInfo *kw_info;
-        HASH_FIND_STR(keywords_table, word, kw_info);
-        if (kw_info) {
-            kw_info->frequency++;
-
-            char *ctx_text = build_context(tokens, token_count, i, CONTEXT_WORDS, CONTEXT_WORDS);
-            add_context(kw_info, line_number, *abs_index + (tokens[i] - line), ctx_text);
-            free(ctx_text);
-        }
-    }
-
-    *abs_index += strlen(line);
-}
-
-void export_json(const char *filename) {
-    FILE *out = fopen(filename, "w");
-    if (!out) {
-        perror("Error creating JSON file");
-        return;
-    }
-
-    fprintf(out, "{\n");
-
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        fprintf(out, "  \"%s\": {\n", kw->keyword);
-        fprintf(out, "    \"frequency\": %zu,\n", kw->frequency);
-        fprintf(out, "    \"contexts\": [\n");
-
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            fprintf(out,
-                    "      {\"line\": %zu, \"index\": %zu, \"context\": \"%s\"}%s\n",
-                    ctx->line_number,
-                    ctx->absolute_index,
-                    ctx->context_text,
-                    ctx->next ? "," : "");
-            ctx = ctx->next;
-        }
-
-        fprintf(out, "    ]\n");
-        fprintf(out, "  }%s\n", tmp->hh.next ? "," : "");
-    }
-
-    fprintf(out, "}\n");
-    fclose(out);
-}
-
-void add_keyword(const char *keyword) {
-    KeywordInfo *kw = malloc(sizeof(KeywordInfo));
-    kw->keyword = strdup(keyword);
-    to_lower_str(kw->keyword);
-    kw->frequency = 0;
-    kw->contexts = NULL;
-    HASH_ADD_KEYPTR(hh, keywords_table, kw->keyword, strlen(kw->keyword), kw);
-}
-
-void free_all() {
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            Context *tmp_ctx = ctx;
-            ctx = ctx->next;
-            free(tmp_ctx->context_text);
-            free(tmp_ctx);
-        }
-        HASH_DEL(keywords_table, kw);
-        free(kw->keyword);
-        free(kw);
-    }
+int safe_fread(void *ptr, size_t size, size_t count, FILE *stream) {
+    size_t r = fread(ptr, size, count, stream);
+    return (r == count);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s archivo.txt salida.json palabra1 palabra2 ...\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Uso: %s entrada.bmp salida.jpg\n", argv[0]);
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
+    if (!is_regular_file(argv[1])) {
+        fprintf(stderr, "El archivo de entrada no es válido.\n");
         return 1;
     }
 
-    const char *output_json = argv[2];
-    for (int i = 3; i < argc; i++) {
-        add_keyword(argv[i]);
+    FILE *bmp = fopen(argv[1], "rb");
+    if (!bmp) {
+        perror("Error abriendo archivo BMP");
+        return 1;
     }
 
-    char *line = NULL;
-    size_t len = 0;
-    size_t line_number = 1;
-    size_t abs_index = 0;
+    BITMAPFILEHEADER file_header;
+    BITMAPINFOHEADER info_header;
 
-    while (getline(&line, &len, file) != -1) {
-        process_line(line, line_number++, &abs_index);
+    if (!safe_fread(&file_header, sizeof(file_header), 1, bmp) ||
+        !safe_fread(&info_header, sizeof(info_header), 1, bmp)) {
+        fprintf(stderr, "Error leyendo encabezados BMP\n");
+        fclose(bmp);
+        return 1;
     }
 
-    fclose(file);
-    free(line);
+    if (file_header.bfType != 0x4D42 || info_header.biBitCount != 24) {
+        fprintf(stderr, "Formato BMP no soportado (solo 24 bits).\n");
+        fclose(bmp);
+        return 1;
+    }
 
-    export_json(output_json);
-    free_all();
+    int width = info_header.biWidth;
+    int height = abs(info_header.biHeight);
+    int padding = (4 - (width * 3) % 4) % 4;
 
+    size_t image_size = (size_t)width * height * 3;
+    unsigned char *data = malloc(image_size);
+    if (!data) {
+        perror("Error reservando memoria");
+        fclose(bmp);
+        return 1;
+    }
+
+    if (fseek(bmp, file_header.bfOffBits, SEEK_SET) != 0) {
+        perror("Error moviendo puntero de archivo BMP");
+        free(data);
+        fclose(bmp);
+        return 1;
+    }
+
+    for (int y = height - 1; y >= 0; y--) {
+        for (int x = 0; x < width; x++) {
+            unsigned char bgr[3];
+            if (!safe_fread(bgr, 3, 1, bmp)) {
+                fprintf(stderr, "Error leyendo datos de píxeles BMP\n");
+                free(data);
+                fclose(bmp);
+                return 1;
+            }
+            size_t index = (size_t)(y * width + x) * 3;
+            if (index + 2 >= image_size) {
+                fprintf(stderr, "Error: índice fuera de límites\n");
+                free(data);
+                fclose(bmp);
+                return 1;
+            }
+            data[index]     = bgr[2]; // R
+            data[index + 1] = bgr[1]; // G
+            data[index + 2] = bgr[0]; // B
+        }
+        if (fseek(bmp, padding, SEEK_CUR) != 0) {
+            perror("Error leyendo padding de fila");
+            free(data);
+            fclose(bmp);
+            return 1;
+        }
+    }
+
+    if (fclose(bmp) != 0) {
+        perror("Error cerrando archivo BMP");
+        free(data);
+        return 1;
+    }
+
+    FILE *jpeg = fopen(argv[2], "wb");
+    if (!jpeg) {
+        perror("Error creando archivo JPEG");
+        free(data);
+        return 1;
+    }
+
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+    jpeg_stdio_dest(&cinfo, jpeg);
+
+    cinfo.image_width = width;
+    cinfo.image_height = height;
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB;
+
+    jpeg_set_defaults(&cinfo);
+    jpeg_start_compress(&cinfo, TRUE);
+
+    while (cinfo.next_scanline < cinfo.image_height) {
+        JSAMPROW row_pointer = &data[cinfo.next_scanline * width * 3];
+        jpeg_write_scanlines(&cinfo, &row_pointer, 1);
+    }
+
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+
+    if (fclose(jpeg) != 0) {
+        perror("Error cerrando archivo JPEG");
+        free(data);
+        return 1;
+    }
+
+    free(data);
+    printf("Conversión segura completada: %s -> %s\n", argv[1], argv[2]);
     return 0;
 }
-
-// Compilar: gcc -o buscador buscador.c

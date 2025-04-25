@@ -1,195 +1,111 @@
-#define _GNU_SOURCE
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdint.h>
+#include <libgen.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include "uthash.h"
+#include "stb_image.h"
+#include "stb_image_resize.h"
+#include "stb_image_write.h"
 
-#define MAX_LINE_LEN 8192
-#define CONTEXT_WORDS 10
+#define MAX_FILE_SIZE (10 * 1024 * 1024)  // 10MB
+#define OUTPUT_DIR "./avatars/"
+#define ALLOWED_MAGIC_PNG "\x89PNG"
+#define ALLOWED_MAGIC_JPG "\xFF\xD8\xFF"
 
-typedef struct Context {
-    size_t line_number;
-    size_t absolute_index;
-    char *context_text;
-    struct Context *next;
-} Context;
-
-typedef struct KeywordInfo {
-    char *keyword;
-    size_t frequency;
-    Context *contexts;
-    UT_hash_handle hh;
-} KeywordInfo;
-
-KeywordInfo *keywords_table = NULL;
-
-void add_context(KeywordInfo *kw_info, size_t line_number, size_t abs_index, const char *context_text) {
-    Context *ctx = malloc(sizeof(Context));
-    ctx->line_number = line_number;
-    ctx->absolute_index = abs_index;
-    ctx->context_text = strdup(context_text);
-    ctx->next = kw_info->contexts;
-    kw_info->contexts = ctx;
-}
-
-void to_lower_str(char *str) {
-    for (; *str; ++str) *str = tolower(*str);
-}
-
-void tokenize_line(const char *line, char **tokens, int *token_count) {
-    char *copy = strdup(line);
-    char *token = strtok(copy, " \t\n\r");
-    *token_count = 0;
-
-    while (token && *token_count < MAX_LINE_LEN) {
-        tokens[(*token_count)++] = token;
-        token = strtok(NULL, " \t\n\r");
+// Sanitiza el nombre del archivo (elimina '../', '/', etc.)
+void sanitize_filename(char *filename) {
+    char *p = filename;
+    while (*p) {
+        if (*p == '/' || *p == '\\') *p = '_';
+        p++;
     }
 }
 
-char *build_context(char **words, int total, int center, int before, int after) {
-    int start = center - before < 0 ? 0 : center - before;
-    int end = center + after >= total ? total - 1 : center + after;
-    size_t length = 0;
-
-    for (int i = start; i <= end; ++i) {
-        length += strlen(words[i]) + 1;
-    }
-
-    char *context = malloc(length + 1);
-    context[0] = '\0';
-
-    for (int i = start; i <= end; ++i) {
-        strcat(context, words[i]);
-        if (i != end) strcat(context, " ");
-    }
-
-    return context;
-}
-
-void process_line(char *line, size_t line_number, size_t *abs_index) {
-    char *tokens[MAX_LINE_LEN];
-    int token_count = 0;
-    tokenize_line(line, tokens, &token_count);
-
-    for (int i = 0; i < token_count; ++i) {
-        char word[256];
-        strncpy(word, tokens[i], 255);
-        word[255] = '\0';
-        to_lower_str(word);
-
-        KeywordInfo *kw_info;
-        HASH_FIND_STR(keywords_table, word, kw_info);
-        if (kw_info) {
-            kw_info->frequency++;
-
-            char *ctx_text = build_context(tokens, token_count, i, CONTEXT_WORDS, CONTEXT_WORDS);
-            add_context(kw_info, line_number, *abs_index + (tokens[i] - line), ctx_text);
-            free(ctx_text);
-        }
-    }
-
-    *abs_index += strlen(line);
-}
-
-void export_json(const char *filename) {
-    FILE *out = fopen(filename, "w");
-    if (!out) {
-        perror("Error creating JSON file");
-        return;
-    }
-
-    fprintf(out, "{\n");
-
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        fprintf(out, "  \"%s\": {\n", kw->keyword);
-        fprintf(out, "    \"frequency\": %zu,\n", kw->frequency);
-        fprintf(out, "    \"contexts\": [\n");
-
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            fprintf(out,
-                    "      {\"line\": %zu, \"index\": %zu, \"context\": \"%s\"}%s\n",
-                    ctx->line_number,
-                    ctx->absolute_index,
-                    ctx->context_text,
-                    ctx->next ? "," : "");
-            ctx = ctx->next;
-        }
-
-        fprintf(out, "    ]\n");
-        fprintf(out, "  }%s\n", tmp->hh.next ? "," : "");
-    }
-
-    fprintf(out, "}\n");
-    fclose(out);
-}
-
-void add_keyword(const char *keyword) {
-    KeywordInfo *kw = malloc(sizeof(KeywordInfo));
-    kw->keyword = strdup(keyword);
-    to_lower_str(kw->keyword);
-    kw->frequency = 0;
-    kw->contexts = NULL;
-    HASH_ADD_KEYPTR(hh, keywords_table, kw->keyword, strlen(kw->keyword), kw);
-}
-
-void free_all() {
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            Context *tmp_ctx = ctx;
-            ctx = ctx->next;
-            free(tmp_ctx->context_text);
-            free(tmp_ctx);
-        }
-        HASH_DEL(keywords_table, kw);
-        free(kw->keyword);
-        free(kw);
-    }
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s archivo.txt salida.json palabra1 palabra2 ...\n", argv[0]);
-        return 1;
-    }
-
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    const char *output_json = argv[2];
-    for (int i = 3; i < argc; i++) {
-        add_keyword(argv[i]);
-    }
-
-    char *line = NULL;
-    size_t len = 0;
-    size_t line_number = 1;
-    size_t abs_index = 0;
-
-    while (getline(&line, &len, file) != -1) {
-        process_line(line, line_number++, &abs_index);
-    }
-
-    fclose(file);
-    free(line);
-
-    export_json(output_json);
-    free_all();
-
+// Verifica el encabezado del archivo para confirmar tipo real
+int verify_magic_bytes(const char *filepath) {
+    unsigned char magic[4];
+    FILE *f = fopen(filepath, "rb");
+    if (!f) return 0;
+    fread(magic, 1, 4, f);
+    fclose(f);
+    if (memcmp(magic, ALLOWED_MAGIC_PNG, 4) == 0) return 1;
+    if (memcmp(magic, ALLOWED_MAGIC_JPG, 3) == 0) return 1;
     return 0;
 }
 
-// Compilar: gcc -o buscador buscador.c
+// Verifica que el archivo no exceda un tamaño límite
+int check_file_size(const char *filepath) {
+    struct stat st;
+    if (stat(filepath, &st) != 0) return 0;
+    return st.st_size <= MAX_FILE_SIZE;
+}
+
+int process_avatar_upload(const char *input_path, const char *output_filename) {
+    int width, height;
+    unsigned char *input_img = NULL, *resized_img = NULL;
+
+    // Validación básica
+    if (!check_file_size(input_path)) {
+        fprintf(stderr, "Archivo demasiado grande.\n");
+        return 1;
+    }
+
+    if (!verify_magic_bytes(input_path)) {
+        fprintf(stderr, "Encabezado del archivo no válido.\n");
+        return 1;
+    }
+
+    input_img = stbi_load(input_path, &width, &height, NULL, 4);
+    if (!input_img) {
+        fprintf(stderr, "Error cargando la imagen: %s\n", stbi_failure_reason());
+        return 1;
+    }
+
+    resized_img = malloc(100 * 100 * 4);
+    if (!resized_img) {
+        fprintf(stderr, "Error de memoria.\n");
+        stbi_image_free(input_img);
+        return 1;
+    }
+
+    stbir_resize_uint8(input_img, width, height, 0, resized_img, 100, 100, 0, 4);
+
+    // Sanitizar nombre del archivo
+    char safe_filename[256];
+    strncpy(safe_filename, output_filename, sizeof(safe_filename) - 1);
+    sanitize_filename(safe_filename);
+
+    // Crear directorio si no existe
+    mkdir(OUTPUT_DIR, 0755);
+
+    // Construir ruta de salida
+    char output_path[512];
+    snprintf(output_path, sizeof(output_path), OUTPUT_DIR "%s.png", safe_filename);
+
+    if (stbi_write_png(output_path, 100, 100, 4, resized_img, 100 * 4) == 0) {
+        fprintf(stderr, "Error guardando la imagen.\n");
+        free(resized_img);
+        stbi_image_free(input_img);
+        return 1;
+    }
+
+    printf("Imagen guardada en: %s\n", output_path);
+    free(resized_img);
+    stbi_image_free(input_img);
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        printf("Uso: %s <imagen_entrada> <nombre_archivo_salida_sin_extension>\n", argv[0]);
+        return 1;
+    }
+    return process_avatar_upload(argv[1], argv[2]);
+}

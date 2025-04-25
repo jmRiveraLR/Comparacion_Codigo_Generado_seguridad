@@ -1,323 +1,161 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <jansson.h>
+#include <limits.h>
+#include <errno.h>
 
-#define MAX_LINE_LENGTH 4096
-#define CONTEXT_WORDS 10
-#define HASH_TABLE_SIZE 1024
+#define BUFFER_SIZE 4096
+#define BACKUP_DIR "respaldo/"
+#define MAX_PATH_LEN 4096 // Tamaño máximo razonable para rutas en sistemas modernos
 
-typedef struct {
-    long line_number;
-    long file_offset;
-    char *line;
-    char *context_before;
-    char *context_after;
-} Occurrence;
-
-typedef struct {
-    char *keyword;
-    int count;
-    Occurrence *occurrences;
-    int occurrences_capacity;
-    int occurrences_size;
-} KeywordEntry;
-
-typedef struct {
-    KeywordEntry *entries[HASH_TABLE_SIZE];
-} HashTable;
-
-unsigned long hash_function(const char *str) {
-    unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash % HASH_TABLE_SIZE;
-}
-
-HashTable *create_hash_table() {
-    HashTable *table = malloc(sizeof(HashTable));
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        table->entries[i] = NULL;
-    }
-    return table;
-}
-
-KeywordEntry *create_keyword_entry(const char *keyword) {
-    KeywordEntry *entry = malloc(sizeof(KeywordEntry));
-    entry->keyword = strdup(keyword);
-    entry->count = 0;
-    entry->occurrences_capacity = 10;
-    entry->occurrences_size = 0;
-    entry->occurrences = malloc(sizeof(Occurrence) * entry->occurrences_capacity);
-    return entry;
-}
-
-void add_occurrence(KeywordEntry *entry, long line_number, long file_offset, const char *line, 
-                    const char *context_before, const char *context_after) {
-    if (entry->occurrences_size >= entry->occurrences_capacity) {
-        entry->occurrences_capacity *= 2;
-        entry->occurrences = realloc(entry->occurrences, sizeof(Occurrence) * entry->occurrences_capacity);
+int is_valid_path(const char *path) {
+    // Validación básica de ruta absoluta
+    if (path == NULL || path[0] != '/') {
+        return 0;
     }
 
-    Occurrence *occ = &entry->occurrences[entry->occurrences_size++];
-    occ->line_number = line_number;
-    occ->file_offset = file_offset;
-    occ->line = strdup(line);
-    occ->context_before = context_before ? strdup(context_before) : NULL;
-    occ->context_after = context_after ? strdup(context_after) : NULL;
+    // Verificar que no contenga componentes inseguros
+    if (strstr(path, "/../") || strstr(path, "//") || strstr(path, "/./")) {
+        return 0;
+    }
+
+    // Verificar longitud máxima
+    if (strlen(path) > MAX_PATH_LEN) {
+        return 0;
+    }
+
+    return 1;
 }
 
-void add_keyword_occurrence(HashTable *table, const char *keyword, long line_number, 
-                           long file_offset, const char *line, const char *context_before, 
-                           const char *context_after) {
-    unsigned long slot = hash_function(keyword);
-    KeywordEntry *entry = table->entries[slot];
+int safe_copy_file(const char *src_path, const char *dest_path) {
+    int src_fd = -1, dest_fd = -1;
+    ssize_t bytes_read, bytes_written;
+    char buffer[BUFFER_SIZE];
+    struct stat src_stat;
 
-    if (entry == NULL) {
-        entry = create_keyword_entry(keyword);
-        table->entries[slot] = entry;
-    } else {
-        // Handle collisions (simple linear probing)
-        while (entry != NULL && strcmp(entry->keyword, keyword) != 0) {
-            slot = (slot + 1) % HASH_TABLE_SIZE;
-            entry = table->entries[slot];
+    // Abrir archivo origen con validaciones de seguridad
+    if ((src_fd = open(src_path, O_RDONLY | O_NOFOLLOW)) == -1) {
+        perror("Error al abrir archivo origen");
+        return -1;
+    }
+
+    // Obtener información del archivo origen
+    if (fstat(src_fd, &src_stat) == -1) {
+        perror("Error al obtener información del archivo");
+        close(src_fd);
+        return -1;
+    }
+
+    // Verificar que es un archivo regular
+    if (!S_ISREG(src_stat.st_mode)) {
+        fprintf(stderr, "Error: El origen no es un archivo regular\n");
+        close(src_fd);
+        return -1;
+    }
+
+    // Crear archivo destino con permisos seguros
+    mode_t old_umask = umask(0077); // Permisos restrictivos
+    if ((dest_fd = open(dest_path, O_WRONLY | O_CREAT | O_EXCL, 0600)) == -1) {
+        perror("Error al crear archivo destino");
+        umask(old_umask);
+        close(src_fd);
+        return -1;
+    }
+    umask(old_umask);
+
+    // Copiar contenido
+    while ((bytes_read = read(src_fd, buffer, BUFFER_SIZE)) > 0) {
+        if (bytes_read == -1) {
+            perror("Error al leer archivo origen");
+            close(src_fd);
+            close(dest_fd);
+            unlink(dest_path); // Eliminar archivo parcialmente copiado
+            return -1;
         }
 
-        if (entry == NULL) {
-            entry = create_keyword_entry(keyword);
-            table->entries[slot] = entry;
+        bytes_written = write(dest_fd, buffer, bytes_read);
+        if (bytes_written != bytes_read) {
+            perror("Error al escribir archivo destino");
+            close(src_fd);
+            close(dest_fd);
+            unlink(dest_path); // Eliminar archivo parcialmente copiado
+            return -1;
         }
     }
 
-    entry->count++;
-    add_occurrence(entry, line_number, file_offset, line, context_before, context_after);
-}
-
-void free_hash_table(HashTable *table) {
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            free(entry->keyword);
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                free(entry->occurrences[j].line);
-                free(entry->occurrences[j].context_before);
-                free(entry->occurrences[j].context_after);
-            }
-            free(entry->occurrences);
-            free(entry);
-        }
-    }
-    free(table);
-}
-
-char **split_words(const char *line, int *word_count) {
-    char **words = NULL;
-    int capacity = 0;
-    int count = 0;
-    const char *p = line;
-
-    while (*p) {
-        while (*p && isspace(*p)) p++;
-        if (!*p) break;
-
-        const char *start = p;
-        while (*p && !isspace(*p)) p++;
-        int len = p - start;
-
-        if (count >= capacity) {
-            capacity = capacity == 0 ? 16 : capacity * 2;
-            words = realloc(words, sizeof(char*) * capacity);
-        }
-
-        words[count] = malloc(len + 1);
-        strncpy(words[count], start, len);
-        words[count][len] = '\0';
-        count++;
+    // Cerrar archivos
+    close(src_fd);
+    if (close(dest_fd) == -1) {
+        perror("Error al cerrar archivo destino");
+        unlink(dest_path);
+        return -1;
     }
 
-    *word_count = count;
-    return words;
+    return 0;
 }
 
-void free_words(char **words, int word_count) {
-    for (int i = 0; i < word_count; i++) {
-        free(words[i]);
-    }
-    free(words);
-}
+int main() {
+    char filepath[MAX_PATH_LEN + 1] = {0};
+    char backup_path[MAX_PATH_LEN + 1] = {0};
+    char *filename;
+    struct stat dir_stat;
 
-char *get_context_before(char **words, int current_word, int word_count) {
-    int start = current_word - CONTEXT_WORDS;
-    if (start < 0) start = 0;
-    int len = current_word - start;
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = start; i < current_word; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > start) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-char *get_context_after(char **words, int current_word, int word_count) {
-    int end = current_word + 1 + CONTEXT_WORDS;
-    if (end > word_count) end = word_count;
-    int len = end - (current_word + 1);
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = current_word + 1; i < end; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > current_word + 1) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-void process_file(const char *filename, HashTable *table, char **keywords, int keyword_count) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(1);
-    }
-
-    char line[MAX_LINE_LENGTH];
-    long line_number = 0;
-    long file_offset = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        size_t line_len = strlen(line);
-        if (line_len > 0 && line[line_len-1] == '\n') {
-            line[line_len-1] = '\0'; // Remove newline
-        }
-
-        int word_count = 0;
-        char **words = split_words(line, &word_count);
-
-        for (int i = 0; i < word_count; i++) {
-            // Normalize word (lowercase, remove punctuation)
-            char *word = words[i];
-            size_t len = strlen(word);
-            for (size_t j = 0; j < len; j++) {
-                if (ispunct(word[j])) {
-                    memmove(&word[j], &word[j+1], len - j);
-                    len--;
-                    j--;
-                } else {
-                    word[j] = tolower(word[j]);
-                }
-            }
-
-            if (len == 0) continue;
-
-            // Check if word is one of our keywords
-            for (int k = 0; k < keyword_count; k++) {
-                if (strcmp(word, keywords[k]) == 0) {
-                    char *context_before = get_context_before(words, i, word_count);
-                    char *context_after = get_context_after(words, i, word_count);
-                    
-                    add_keyword_occurrence(table, keywords[k], line_number, file_offset, 
-                                          line, context_before, context_after);
-                    
-                    free(context_before);
-                    free(context_after);
-                    break;
-                }
-            }
-        }
-
-        free_words(words, word_count);
-        file_offset += line_len;
-    }
-
-    fclose(file);
-}
-
-json_t *hash_table_to_json(HashTable *table) {
-    json_t *root = json_object();
-
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            json_t *keyword_obj = json_object();
-            json_object_set_new(keyword_obj, "count", json_integer(entry->count));
-
-            json_t *occurrences_array = json_array();
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                Occurrence *occ = &entry->occurrences[j];
-                json_t *occ_obj = json_object();
-                json_object_set_new(occ_obj, "line_number", json_integer(occ->line_number));
-                json_object_set_new(occ_obj, "file_offset", json_integer(occ->file_offset));
-                json_object_set_new(occ_obj, "line", json_string(occ->line));
-                if (occ->context_before) {
-                    json_object_set_new(occ_obj, "context_before", json_string(occ->context_before));
-                }
-                if (occ->context_after) {
-                    json_object_set_new(occ_obj, "context_after", json_string(occ->context_after));
-                }
-                json_array_append_new(occurrences_array, occ_obj);
-            }
-
-            json_object_set_new(keyword_obj, "occurrences", occurrences_array);
-            json_object_set_new(root, entry->keyword, keyword_obj);
-        }
-    }
-
-    return root;
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <filename> <keyword1> [keyword2 ...]\n", argv[0]);
+    // Leer la ruta del archivo con límite seguro
+    printf("Ingrese la ruta absoluta del archivo a respaldar: ");
+    if (fgets(filepath, sizeof(filepath), stdin) == NULL) {
+        perror("Error al leer la entrada");
         return 1;
     }
 
-    const char *filename = argv[1];
-    int keyword_count = argc - 2;
-    char **keywords = malloc(sizeof(char*) * keyword_count);
+    // Eliminar salto de línea y validar entrada
+    filepath[strcspn(filepath, "\n")] = '\0';
+    if (!is_valid_path(filepath)) {
+        fprintf(stderr, "Error: Ruta inválida o insegura\n");
+        return 1;
+    }
 
-    // Normalize keywords (lowercase)
-    for (int i = 0; i < keyword_count; i++) {
-        keywords[i] = strdup(argv[i + 2]);
-        for (char *p = keywords[i]; *p; p++) {
-            *p = tolower(*p);
+    // Verificar existencia del directorio respaldo de forma segura
+    if (stat(BACKUP_DIR, &dir_stat) == -1) {
+        if (errno == ENOENT) {
+            // Crear directorio con permisos seguros
+            mode_t old_umask = umask(0077);
+            if (mkdir(BACKUP_DIR, 0700) == -1) {
+                perror("Error al crear directorio respaldo");
+                umask(old_umask);
+                return 1;
+            }
+            umask(old_umask);
+        } else {
+            perror("Error al verificar directorio respaldo");
+            return 1;
         }
+    } else if (!S_ISDIR(dir_stat.st_mode)) {
+        fprintf(stderr, "Error: %s existe pero no es un directorio\n", BACKUP_DIR);
+        return 1;
     }
 
-    HashTable *table = create_hash_table();
-    process_file(filename, table, keywords, keyword_count);
-
-    // Convert to JSON and print
-    json_t *root = hash_table_to_json(table);
-    char *json_str = json_dumps(root, JSON_INDENT(2));
-    printf("%s\n", json_str);
-
-    // Cleanup
-    free(json_str);
-    json_decref(root);
-    for (int i = 0; i < keyword_count; i++) {
-        free(keywords[i]);
+    // Extraer nombre del archivo de forma segura
+    if ((filename = strrchr(filepath, '/')) == NULL || *(filename + 1) == '\0') {
+        fprintf(stderr, "Error: No se pudo determinar el nombre del archivo\n");
+        return 1;
     }
-    free(keywords);
-    free_hash_table(table);
+    filename++; // Saltar el '/'
 
+    // Construir ruta de destino con verificación de longitud
+    if (snprintf(backup_path, sizeof(backup_path), "%s%s", BACKUP_DIR, filename) >= sizeof(backup_path)) {
+        fprintf(stderr, "Error: Ruta de destino demasiado larga\n");
+        return 1;
+    }
+
+    // Realizar copia segura
+    if (safe_copy_file(filepath, backup_path) != 0) {
+        fprintf(stderr, "Error: No se pudo completar el respaldo\n");
+        return 1;
+    }
+
+    printf("Archivo copiado exitosamente a %s\n", backup_path);
     return 0;
 }

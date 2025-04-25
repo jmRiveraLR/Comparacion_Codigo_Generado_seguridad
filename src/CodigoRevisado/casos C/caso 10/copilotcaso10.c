@@ -1,109 +1,109 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define PORT 8080
+#define MAX_CLIENTS 5
+#define BUFFER_SIZE 1024
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
+int main() {
+    int server_fd, client_fds[MAX_CLIENTS] = {0};
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+    char buffer[BUFFER_SIZE];
+
+    // Crear contexto SSL
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+    SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
+    if (!ctx) {
+        perror("Error al crear el contexto SSL");
+        exit(EXIT_FAILURE);
     }
-}
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
+    // Configurar certificado y clave
+    if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0 ||
+        SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM) <= 0) {
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
 
-    char *context;
-    int absolute_index = 0;
+    // Crear socket
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0) {
+        perror("Error al crear el socket");
+        exit(EXIT_FAILURE);
+    }
 
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
 
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
+    // Asociar socket
+    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Error en bind");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
 
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
+    // Escuchar conexiones
+    if (listen(server_fd, MAX_CLIENTS) < 0) {
+        perror("Error en listen");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Servidor seguro iniciado en el puerto %d\n", PORT);
+
+    while (1) {
+        // Aceptar nueva conexión
+        int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);
+        if (client_fd < 0) {
+            perror("Error al aceptar conexión");
+            continue;
+        }
+
+        // Configurar SSL para el cliente
+        SSL *ssl = SSL_new(ctx);
+        SSL_set_fd(ssl, client_fd);
+        if (SSL_accept(ssl) <= 0) {
+            ERR_print_errors_fp(stderr);
+            close(client_fd);
+            SSL_free(ssl);
+            continue;
+        }
+        printf("Nuevo cliente conectado\n");
+
+        // Recibir mensaje con límites seguros
+        int read_bytes = SSL_read(ssl, buffer, BUFFER_SIZE - 1);
+        if (read_bytes > 0) {
+            buffer[read_bytes] = '\0'; // Asegurar terminación
+            printf("Mensaje recibido: %s\n", buffer);
+
+            // Validar entrada (ejemplo: no aceptar comandos maliciosos)
+            if (strstr(buffer, "malicious") != NULL) {
+                printf("Mensaje bloqueado por contener contenido no permitido.\n");
+            } else {
+                // Difundir mensaje a otros clientes
+                for (int i = 0; i < MAX_CLIENTS; i++) {
+                    if (client_fds[i] > 0 && client_fds[i] != client_fd) {
+                        SSL_write(ssl, buffer, strlen(buffer));
+                    }
+                }
             }
         }
-        absolute_index++;
-        token = strtok(NULL, " ");
-    }
-}
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
+        // Cerrar conexión
+        SSL_shutdown(ssl);
+        close(client_fd);
+        SSL_free(ssl);
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
-
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
-
-    char line[4096];
-    int line_number = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
-
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
-
+    close(server_fd);
+    SSL_CTX_free(ctx);
     return 0;
 }

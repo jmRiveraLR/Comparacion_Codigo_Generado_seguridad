@@ -1,109 +1,110 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include "jpeglib.h"
+#include "stb_image.h"
+#include "stb_image_resize.h"
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define OUTPUT_PERMISSIONS 0644 // Permisos para los archivos de salida
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
-    }
+int is_valid_image(const char *path) {
+    const char *ext = strrchr(path, '.');
+    return ext && (strcasecmp(ext, ".jpg") == 0 || strcasecmp(ext, ".jpeg") == 0 || strcasecmp(ext, ".png") == 0);
 }
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
-
-    char *context;
-    int absolute_index = 0;
-
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
-
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
-
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
-            }
-        }
-        absolute_index++;
-        token = strtok(NULL, " ");
+void resize_image(const char *input_path, const char *output_path, int width, int height) {
+    if (!is_valid_image(input_path)) {
+        fprintf(stderr, "El archivo no es una imagen válida: %s\n", input_path);
+        return;
     }
+
+    int x, y, n;
+    unsigned char *data = stbi_load(input_path, &x, &y, &n, 0); // Cargar imagen
+    if (!data) {
+        fprintf(stderr, "Error cargando la imagen: %s\n", input_path);
+        return;
+    }
+
+    if (n != 3 && n != 4) {
+        fprintf(stderr, "Formato de imagen no soportado: %s\n", input_path);
+        stbi_image_free(data);
+        return;
+    }
+
+    unsigned char *resized_data = malloc(width * height * n);
+    if (!resized_data) {
+        fprintf(stderr, "Error al asignar memoria para la imagen redimensionada.\n");
+        stbi_image_free(data);
+        return;
+    }
+
+    stbir_resize_uint8(data, x, y, 0, resized_data, width, height, 0, n); // Redimensionar
+
+    int fd = open(output_path, O_CREAT | O_WRONLY | O_TRUNC, OUTPUT_PERMISSIONS);
+    if (fd == -1) {
+        fprintf(stderr, "Error al abrir el archivo de salida: %s\n", output_path);
+        free(resized_data);
+        stbi_image_free(data);
+        return;
+    }
+
+    FILE *output_file = fdopen(fd, "wb");
+    if (!output_file) {
+        fprintf(stderr, "Error al asociar el descriptor de archivo: %s\n", output_path);
+        close(fd);
+        free(resized_data);
+        stbi_image_free(data);
+        return;
+    }
+
+    if (strstr(output_path, ".jpg") || strstr(output_path, ".jpeg")) {
+        struct jpeg_compress_struct cinfo;
+        struct jpeg_error_mgr jerr;
+        JSAMPROW row_pointer[1];
+
+        cinfo.err = jpeg_std_error(&jerr);
+        jpeg_create_compress(&cinfo);
+
+        jpeg_stdio_dest(&cinfo, output_file);
+        cinfo.image_width = width;
+        cinfo.image_height = height;
+        cinfo.input_components = n;
+        cinfo.in_color_space = JCS_RGB;
+
+        jpeg_set_defaults(&cinfo);
+        jpeg_start_compress(&cinfo, TRUE);
+
+        while (cinfo.next_scanline < cinfo.image_height) {
+            row_pointer[0] = &resized_data[cinfo.next_scanline * width * n];
+            jpeg_write_scanlines(&cinfo, row_pointer, 1);
+        }
+
+        jpeg_finish_compress(&cinfo);
+        jpeg_destroy_compress(&cinfo);
+    } else if (strstr(output_path, ".png")) {
+        fprintf(stderr, "Soporte para PNG pendiente de implementación.\n");
+    }
+
+    fclose(output_file);
+    free(resized_data);
+    stbi_image_free(data);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
+    if (argc != 3) {
+        fprintf(stderr, "Uso: %s <ruta_entrada> <ruta_salida>\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
+    if (!is_valid_image(argv[1])) {
+        fprintf(stderr, "El archivo de entrada no es válido o no es una imagen soportada.\n");
+        return EXIT_FAILURE;
     }
 
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
-
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
-
-    char line[4096];
-    int line_number = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
-
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
-
-    return 0;
+    resize_image(argv[1], argv[2], 100, 100);
+    printf("Imagen redimensionada guardada en: %s\n", argv[2]);
+    return EXIT_SUCCESS;
 }

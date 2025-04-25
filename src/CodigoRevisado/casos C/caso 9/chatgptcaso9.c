@@ -1,195 +1,132 @@
-#define _GNU_SOURCE
-#include <stdio.h>
+#include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "uthash.h"
+#include <stdio.h>
+#include <arpa/inet.h>
 
-#define MAX_LINE_LEN 8192
-#define CONTEXT_WORDS 10
+#define PORT 8888
+#define MAX_POST_SIZE 65536
+#define SECRET_TOKEN "supersecreto123"  // Debe estar en entorno en producción
 
-typedef struct Context {
-    size_t line_number;
-    size_t absolute_index;
-    char *context_text;
-    struct Context *next;
-} Context;
+const char *allowed_ips[] = {
+    "192.168.1.100",
+    "10.0.0.5",
+    "203.0.113.42"
+};
+const size_t allowed_ips_count = sizeof(allowed_ips) / sizeof(allowed_ips[0]);
 
-typedef struct KeywordInfo {
-    char *keyword;
-    size_t frequency;
-    Context *contexts;
-    UT_hash_handle hh;
-} KeywordInfo;
-
-KeywordInfo *keywords_table = NULL;
-
-void add_context(KeywordInfo *kw_info, size_t line_number, size_t abs_index, const char *context_text) {
-    Context *ctx = malloc(sizeof(Context));
-    ctx->line_number = line_number;
-    ctx->absolute_index = abs_index;
-    ctx->context_text = strdup(context_text);
-    ctx->next = kw_info->contexts;
-    kw_info->contexts = ctx;
-}
-
-void to_lower_str(char *str) {
-    for (; *str; ++str) *str = tolower(*str);
-}
-
-void tokenize_line(const char *line, char **tokens, int *token_count) {
-    char *copy = strdup(line);
-    char *token = strtok(copy, " \t\n\r");
-    *token_count = 0;
-
-    while (token && *token_count < MAX_LINE_LEN) {
-        tokens[(*token_count)++] = token;
-        token = strtok(NULL, " \t\n\r");
+int is_ip_allowed(const char *ip) {
+    for (size_t i = 0; i < allowed_ips_count; i++) {
+        if (strcmp(ip, allowed_ips[i]) == 0)
+            return 1;
     }
-}
-
-char *build_context(char **words, int total, int center, int before, int after) {
-    int start = center - before < 0 ? 0 : center - before;
-    int end = center + after >= total ? total - 1 : center + after;
-    size_t length = 0;
-
-    for (int i = start; i <= end; ++i) {
-        length += strlen(words[i]) + 1;
-    }
-
-    char *context = malloc(length + 1);
-    context[0] = '\0';
-
-    for (int i = start; i <= end; ++i) {
-        strcat(context, words[i]);
-        if (i != end) strcat(context, " ");
-    }
-
-    return context;
-}
-
-void process_line(char *line, size_t line_number, size_t *abs_index) {
-    char *tokens[MAX_LINE_LEN];
-    int token_count = 0;
-    tokenize_line(line, tokens, &token_count);
-
-    for (int i = 0; i < token_count; ++i) {
-        char word[256];
-        strncpy(word, tokens[i], 255);
-        word[255] = '\0';
-        to_lower_str(word);
-
-        KeywordInfo *kw_info;
-        HASH_FIND_STR(keywords_table, word, kw_info);
-        if (kw_info) {
-            kw_info->frequency++;
-
-            char *ctx_text = build_context(tokens, token_count, i, CONTEXT_WORDS, CONTEXT_WORDS);
-            add_context(kw_info, line_number, *abs_index + (tokens[i] - line), ctx_text);
-            free(ctx_text);
-        }
-    }
-
-    *abs_index += strlen(line);
-}
-
-void export_json(const char *filename) {
-    FILE *out = fopen(filename, "w");
-    if (!out) {
-        perror("Error creating JSON file");
-        return;
-    }
-
-    fprintf(out, "{\n");
-
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        fprintf(out, "  \"%s\": {\n", kw->keyword);
-        fprintf(out, "    \"frequency\": %zu,\n", kw->frequency);
-        fprintf(out, "    \"contexts\": [\n");
-
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            fprintf(out,
-                    "      {\"line\": %zu, \"index\": %zu, \"context\": \"%s\"}%s\n",
-                    ctx->line_number,
-                    ctx->absolute_index,
-                    ctx->context_text,
-                    ctx->next ? "," : "");
-            ctx = ctx->next;
-        }
-
-        fprintf(out, "    ]\n");
-        fprintf(out, "  }%s\n", tmp->hh.next ? "," : "");
-    }
-
-    fprintf(out, "}\n");
-    fclose(out);
-}
-
-void add_keyword(const char *keyword) {
-    KeywordInfo *kw = malloc(sizeof(KeywordInfo));
-    kw->keyword = strdup(keyword);
-    to_lower_str(kw->keyword);
-    kw->frequency = 0;
-    kw->contexts = NULL;
-    HASH_ADD_KEYPTR(hh, keywords_table, kw->keyword, strlen(kw->keyword), kw);
-}
-
-void free_all() {
-    KeywordInfo *kw, *tmp;
-    HASH_ITER(hh, keywords_table, kw, tmp) {
-        Context *ctx = kw->contexts;
-        while (ctx) {
-            Context *tmp_ctx = ctx;
-            ctx = ctx->next;
-            free(tmp_ctx->context_text);
-            free(tmp_ctx);
-        }
-        HASH_DEL(keywords_table, kw);
-        free(kw->keyword);
-        free(kw);
-    }
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s archivo.txt salida.json palabra1 palabra2 ...\n", argv[0]);
-        return 1;
-    }
-
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
-    }
-
-    const char *output_json = argv[2];
-    for (int i = 3; i < argc; i++) {
-        add_keyword(argv[i]);
-    }
-
-    char *line = NULL;
-    size_t len = 0;
-    size_t line_number = 1;
-    size_t abs_index = 0;
-
-    while (getline(&line, &len, file) != -1) {
-        process_line(line, line_number++, &abs_index);
-    }
-
-    fclose(file);
-    free(line);
-
-    export_json(output_json);
-    free_all();
-
     return 0;
 }
 
-// Compilar: gcc -o buscador buscador.c
+struct connection_info_struct {
+    char *post_data;
+    size_t size;
+};
+
+static int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind,
+                        const char *key, const char *filename,
+                        const char *content_type, const char *transfer_encoding,
+                        const char *data, uint64_t off, size_t size) {
+    struct connection_info_struct *con_info = coninfo_cls;
+    if (size + con_info->size >= MAX_POST_SIZE)
+        return MHD_NO;
+    memcpy(con_info->post_data + con_info->size, data, size);
+    con_info->size += size;
+    return MHD_YES;
+}
+
+static int request_handler(void *cls, struct MHD_Connection *connection,
+                           const char *url, const char *method,
+                           const char *version, const char *upload_data,
+                           size_t *upload_data_size, void **con_cls) {
+    if (*con_cls == NULL) {
+        struct connection_info_struct *con_info = calloc(1, sizeof(struct connection_info_struct));
+        if (!con_info)
+            return MHD_NO;
+        con_info->post_data = calloc(1, MAX_POST_SIZE);
+        if (!con_info->post_data) {
+            free(con_info);
+            return MHD_NO;
+        }
+        *con_cls = con_info;
+        return MHD_YES;
+    }
+
+    struct connection_info_struct *con_info = *con_cls;
+
+    if (strcmp(method, "POST") != 0)
+        return MHD_NO;
+
+    if (*upload_data_size != 0) {
+        if (con_info->size + *upload_data_size >= MAX_POST_SIZE) return MHD_NO;
+        memcpy(con_info->post_data + con_info->size, upload_data, *upload_data_size);
+        con_info->size += *upload_data_size;
+        *upload_data_size = 0;
+        return MHD_YES;
+    }
+
+    // Validación de IP
+    const union MHD_ConnectionInfo *info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS);
+    struct sockaddr_in *addr = (struct sockaddr_in *)info->client_addr;
+    char client_ip[INET_ADDRSTRLEN];
+    if (!inet_ntop(AF_INET, &(addr->sin_addr), client_ip, sizeof(client_ip))) {
+        return MHD_NO;
+    }
+
+    if (!is_ip_allowed(client_ip)) {
+        const char *forbidden = "403 Forbidden - IP";
+        struct MHD_Response *response = MHD_create_response_from_buffer(strlen(forbidden), (void *)forbidden, MHD_RESPMEM_PERSISTENT);
+        int ret = MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, response);
+        MHD_destroy_response(response);
+        return ret;
+    }
+
+    // Validación de token
+    const char *header_token = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Signature");
+    if (!header_token || strcmp(header_token, SECRET_TOKEN) != 0) {
+        const char *unauthorized = "403 Forbidden - Token";
+        struct MHD_Response *response = MHD_create_response_from_buffer(strlen(unauthorized), (void *)unauthorized, MHD_RESPMEM_PERSISTENT);
+        int ret = MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, response);
+        MHD_destroy_response(response);
+        return ret;
+    }
+
+    // Validación básica del payload
+    if (con_info->size == 0 || con_info->size >= MAX_POST_SIZE) {
+        const char *bad = "400 Bad Request";
+        struct MHD_Response *response = MHD_create_response_from_buffer(strlen(bad), (void *)bad, MHD_RESPMEM_PERSISTENT);
+        int ret = MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, response);
+        MHD_destroy_response(response);
+        return ret;
+    }
+
+    printf("✅ IP válida: %s\n", client_ip);
+    printf("✅ Token verificado\n");
+    printf("📦 Payload: %.*s\n", (int)con_info->size, con_info->post_data);
+
+    const char *ok = "200 OK";
+    struct MHD_Response *response = MHD_create_response_from_buffer(strlen(ok), (void *)ok, MHD_RESPMEM_PERSISTENT);
+    int ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+    MHD_destroy_response(response);
+    return ret;
+}
+
+int main() {
+    printf("⚠️  Este webhook DEBE ejecutarse bajo HTTPS en producción.\n");
+
+    struct MHD_Daemon *daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, PORT, NULL, NULL,
+                                                  &request_handler, NULL, MHD_OPTION_NOTIFY_COMPLETED, NULL, NULL,
+                                                  MHD_OPTION_END);
+    if (!daemon)
+        return 1;
+
+    printf("Webhook iniciado en puerto %d...\n", PORT);
+    getchar(); // detener servidor
+    MHD_stop_daemon(daemon);
+    return 0;
+}

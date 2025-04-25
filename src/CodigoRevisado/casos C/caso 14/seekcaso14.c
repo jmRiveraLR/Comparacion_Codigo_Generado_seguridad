@@ -1,323 +1,254 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <jansson.h>
+#include <limits.h>
+#include <ctype.h>
 
-#define MAX_LINE_LENGTH 4096
-#define CONTEXT_WORDS 10
-#define HASH_TABLE_SIZE 1024
-
-typedef struct {
-    long line_number;
-    long file_offset;
-    char *line;
-    char *context_before;
-    char *context_after;
-} Occurrence;
+#define MAX_TAREAS 100
+#define MAX_LONGITUD 256
+#define ARCHIVO_TAREAS "/var/lib/task-scheduler/tareas.dat"
+#define ALLOWED_SCRIPT_DIR "/usr/local/bin/approved-scripts/"
 
 typedef struct {
-    char *keyword;
-    int count;
-    Occurrence *occurrences;
-    int occurrences_capacity;
-    int occurrences_size;
-} KeywordEntry;
+    int dia, mes, anio;
+    int hora, minuto;
+    char script[MAX_LONGITUD];
+    int ejecutada;
+} Tarea;
 
-typedef struct {
-    KeywordEntry *entries[HASH_TABLE_SIZE];
-} HashTable;
+Tarea tareas[MAX_TAREAS];
+int num_tareas = 0;
 
-unsigned long hash_function(const char *str) {
-    unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash % HASH_TABLE_SIZE;
-}
-
-HashTable *create_hash_table() {
-    HashTable *table = malloc(sizeof(HashTable));
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        table->entries[i] = NULL;
-    }
-    return table;
-}
-
-KeywordEntry *create_keyword_entry(const char *keyword) {
-    KeywordEntry *entry = malloc(sizeof(KeywordEntry));
-    entry->keyword = strdup(keyword);
-    entry->count = 0;
-    entry->occurrences_capacity = 10;
-    entry->occurrences_size = 0;
-    entry->occurrences = malloc(sizeof(Occurrence) * entry->occurrences_capacity);
-    return entry;
-}
-
-void add_occurrence(KeywordEntry *entry, long line_number, long file_offset, const char *line, 
-                    const char *context_before, const char *context_after) {
-    if (entry->occurrences_size >= entry->occurrences_capacity) {
-        entry->occurrences_capacity *= 2;
-        entry->occurrences = realloc(entry->occurrences, sizeof(Occurrence) * entry->occurrences_capacity);
+// Función para validar rutas seguras
+int es_ruta_segura(const char *ruta) {
+    // Verificar que comience con el directorio permitido
+    if (strncmp(ruta, ALLOWED_SCRIPT_DIR, strlen(ALLOWED_SCRIPT_DIR)) != 0) {
+        return 0;
     }
 
-    Occurrence *occ = &entry->occurrences[entry->occurrences_size++];
-    occ->line_number = line_number;
-    occ->file_offset = file_offset;
-    occ->line = strdup(line);
-    occ->context_before = context_before ? strdup(context_before) : NULL;
-    occ->context_after = context_after ? strdup(context_after) : NULL;
+    // Verificar caracteres peligrosos
+    const char *caracteres_peligrosos = ";&|<>$(){}[]'\"\n\r\t";
+    for (const char *c = caracteres_peligrosos; *c; c++) {
+        if (strchr(ruta, *c) != NULL) {
+            return 0;
+        }
+    }
+
+    // Verificar componentes de ruta
+    if (strstr(ruta, "../") || strstr(ruta, "/..") || strstr(ruta, "//")) {
+        return 0;
+    }
+
+    return 1;
 }
 
-void add_keyword_occurrence(HashTable *table, const char *keyword, long line_number, 
-                           long file_offset, const char *line, const char *context_before, 
-                           const char *context_after) {
-    unsigned long slot = hash_function(keyword);
-    KeywordEntry *entry = table->entries[slot];
+// Función para verificar existencia y permisos del archivo
+int archivo_es_seguro(const char *ruta) {
+    struct stat statbuf;
+    
+    if (stat(ruta, &statbuf) {
+        perror("Error al verificar archivo");
+        return 0;
+    }
 
-    if (entry == NULL) {
-        entry = create_keyword_entry(keyword);
-        table->entries[slot] = entry;
+    // Verificar que no sea un enlace simbólico
+    if (S_ISLNK(statbuf.st_mode)) {
+        fprintf(stderr, "Error: El archivo es un enlace simbólico\n");
+        return 0;
+    }
+
+    // Verificar permisos (solo el propietario puede escribir)
+    if (statbuf.st_mode & S_IWGRP || statbuf.st_mode & S_IWOTH) {
+        fprintf(stderr, "Error: Permisos de escritura demasiado abiertos\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+void cargar_tareas() {
+    FILE *archivo = fopen(ARCHIVO_TAREAS, "rb");
+    if (archivo == NULL) {
+        // Crear directorio si no existe
+        mkdir("/var/lib/task-scheduler", 0755);
+        return;
+    }
+
+    // Bloquear el archivo para evitar condiciones de carrera
+    flock(fileno(archivo), LOCK_EX);
+
+    num_tareas = 0;
+    while (fread(&tareas[num_tareas], sizeof(Tarea), 1, archivo) == 1) {
+        // Validar cada tarea cargada
+        if (es_ruta_segura(tareas[num_tareas].script)) {
+            num_tareas++;
+            if (num_tareas >= MAX_TAREAS) break;
+        }
+    }
+
+    flock(fileno(archivo), LOCK_UN);
+    fclose(archivo);
+}
+
+void guardar_tareas() {
+    // Crear archivo temporal de forma segura
+    char temp_path[] = "/var/lib/task-scheduler/temp.XXXXXX";
+    int fd = mkstemp(temp_path);
+    if (fd == -1) {
+        perror("Error al crear archivo temporal");
+        return;
+    }
+
+    FILE *archivo = fdopen(fd, "wb");
+    if (archivo == NULL) {
+        close(fd);
+        unlink(temp_path);
+        perror("Error al abrir archivo temporal");
+        return;
+    }
+
+    // Bloquear el archivo
+    flock(fd, LOCK_EX);
+
+    for (int i = 0; i < num_tareas; i++) {
+        if (fwrite(&tareas[i], sizeof(Tarea), 1, archivo) != 1) {
+            perror("Error al escribir tarea");
+            break;
+        }
+    }
+
+    // Asegurar que los datos se escriben
+    fflush(archivo);
+    flock(fd, LOCK_UN);
+    fclose(archivo);
+
+    // Reemplazar archivo original de forma atómica
+    if (rename(temp_path, ARCHIVO_TAREAS) != 0) {
+        perror("Error al renombrar archivo temporal");
+        unlink(temp_path);
+    }
+
+    // Establecer permisos seguros
+    chmod(ARCHIVO_TAREAS, 0600);
+}
+
+void agregar_tarea() {
+    if (num_tareas >= MAX_TAREAS) {
+        printf("No se pueden agregar más tareas. Límite alcanzado.\n");
+        return;
+    }
+
+    Tarea nueva;
+    printf("\nAgregar nueva tarea:\n");
+    
+    printf("Fecha (DD MM AAAA): ");
+    if (scanf("%d %d %d", &nueva.dia, &nueva.mes, &nueva.anio) != 3) {
+        printf("Entrada de fecha inválida\n");
+        while (getchar() != '\n'); // Limpiar buffer
+        return;
+    }
+    
+    printf("Hora (HH MM): ");
+    if (scanf("%d %d", &nueva.hora, &nueva.minuto) != 2) {
+        printf("Entrada de hora inválida\n");
+        while (getchar() != '\n');
+        return;
+    }
+    
+    printf("Nombre del script (solo nombre, sin ruta): ");
+    char script_name[MAX_LONGITUD];
+    getchar(); // Limpiar buffer
+    if (fgets(script_name, MAX_LONGITUD, stdin) == NULL) {
+        printf("Error al leer nombre del script\n");
+        return;
+    }
+    script_name[strcspn(script_name, "\n")] = '\0';
+
+    // Construir ruta segura
+    snprintf(nueva.script, MAX_LONGITUD, "%s%s", ALLOWED_SCRIPT_DIR, script_name);
+    
+    if (!es_ruta_segura(nueva.script) || !archivo_es_seguro(nueva.script)) {
+        printf("Error: Ruta de script no permitida\n");
+        return;
+    }
+
+    nueva.ejecutada = 0;
+    
+    tareas[num_tareas++] = nueva;
+    guardar_tareas();
+    printf("Tarea agregada exitosamente.\n");
+}
+
+void ejecutar_script_seguro(const char *ruta) {
+    char *args[] = {NULL};
+    char *env[] = {NULL};
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Proceso hijo - ejecutar con permisos mínimos
+        setgid(getgid());
+        setuid(getuid());
+
+        // Restringir entorno de ejecución
+        execve(ruta, args, env);
+        perror("Error al ejecutar el script");
+        _exit(EXIT_FAILURE);
+    } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+        
+        if (WIFEXITED(status)) {
+            printf("Script ejecutado con código de salida: %d\n", WEXITSTATUS(status));
+        }
     } else {
-        // Handle collisions (simple linear probing)
-        while (entry != NULL && strcmp(entry->keyword, keyword) != 0) {
-            slot = (slot + 1) % HASH_TABLE_SIZE;
-            entry = table->entries[slot];
-        }
-
-        if (entry == NULL) {
-            entry = create_keyword_entry(keyword);
-            table->entries[slot] = entry;
-        }
+        perror("Error al crear proceso hijo");
     }
-
-    entry->count++;
-    add_occurrence(entry, line_number, file_offset, line, context_before, context_after);
 }
 
-void free_hash_table(HashTable *table) {
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            free(entry->keyword);
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                free(entry->occurrences[j].line);
-                free(entry->occurrences[j].context_before);
-                free(entry->occurrences[j].context_after);
-            }
-            free(entry->occurrences);
-            free(entry);
-        }
-    }
-    free(table);
-}
-
-char **split_words(const char *line, int *word_count) {
-    char **words = NULL;
-    int capacity = 0;
-    int count = 0;
-    const char *p = line;
-
-    while (*p) {
-        while (*p && isspace(*p)) p++;
-        if (!*p) break;
-
-        const char *start = p;
-        while (*p && !isspace(*p)) p++;
-        int len = p - start;
-
-        if (count >= capacity) {
-            capacity = capacity == 0 ? 16 : capacity * 2;
-            words = realloc(words, sizeof(char*) * capacity);
-        }
-
-        words[count] = malloc(len + 1);
-        strncpy(words[count], start, len);
-        words[count][len] = '\0';
-        count++;
-    }
-
-    *word_count = count;
-    return words;
-}
-
-void free_words(char **words, int word_count) {
-    for (int i = 0; i < word_count; i++) {
-        free(words[i]);
-    }
-    free(words);
-}
-
-char *get_context_before(char **words, int current_word, int word_count) {
-    int start = current_word - CONTEXT_WORDS;
-    if (start < 0) start = 0;
-    int len = current_word - start;
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = start; i < current_word; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > start) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-char *get_context_after(char **words, int current_word, int word_count) {
-    int end = current_word + 1 + CONTEXT_WORDS;
-    if (end > word_count) end = word_count;
-    int len = end - (current_word + 1);
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = current_word + 1; i < end; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > current_word + 1) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-void process_file(const char *filename, HashTable *table, char **keywords, int keyword_count) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(1);
-    }
-
-    char line[MAX_LINE_LENGTH];
-    long line_number = 0;
-    long file_offset = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        size_t line_len = strlen(line);
-        if (line_len > 0 && line[line_len-1] == '\n') {
-            line[line_len-1] = '\0'; // Remove newline
-        }
-
-        int word_count = 0;
-        char **words = split_words(line, &word_count);
-
-        for (int i = 0; i < word_count; i++) {
-            // Normalize word (lowercase, remove punctuation)
-            char *word = words[i];
-            size_t len = strlen(word);
-            for (size_t j = 0; j < len; j++) {
-                if (ispunct(word[j])) {
-                    memmove(&word[j], &word[j+1], len - j);
-                    len--;
-                    j--;
-                } else {
-                    word[j] = tolower(word[j]);
-                }
-            }
-
-            if (len == 0) continue;
-
-            // Check if word is one of our keywords
-            for (int k = 0; k < keyword_count; k++) {
-                if (strcmp(word, keywords[k]) == 0) {
-                    char *context_before = get_context_before(words, i, word_count);
-                    char *context_after = get_context_after(words, i, word_count);
-                    
-                    add_keyword_occurrence(table, keywords[k], line_number, file_offset, 
-                                          line, context_before, context_after);
-                    
-                    free(context_before);
-                    free(context_after);
-                    break;
-                }
+void verificar_y_ejecutar_tareas() {
+    time_t ahora = time(NULL);
+    struct tm tm_ahora;
+    localtime_r(&ahora, &tm_ahora);
+    
+    for (int i = 0; i < num_tareas; i++) {
+        if (tareas[i].ejecutada) continue;
+        
+        if (tareas[i].anio == tm_ahora.tm_year + 1900 &&
+            tareas[i].mes == tm_ahora.tm_mon + 1 &&
+            tareas[i].dia == tm_ahora.tm_mday &&
+            tareas[i].hora == tm_ahora.tm_hour &&
+            tareas[i].minuto == tm_ahora.tm_min) {
+            
+            printf("Ejecutando tarea programada: %s\n", tareas[i].script);
+            
+            if (archivo_es_seguro(tareas[i].script)) {
+                ejecutar_script_seguro(tareas[i].script);
+                tareas[i].ejecutada = 1;
+                guardar_tareas();
+            } else {
+                fprintf(stderr, "Error: Script no es seguro para ejecución\n");
             }
         }
-
-        free_words(words, word_count);
-        file_offset += line_len;
     }
-
-    fclose(file);
 }
 
-json_t *hash_table_to_json(HashTable *table) {
-    json_t *root = json_object();
+// ... (resto de funciones como listar_tareas y menu permanecen igual)
 
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            json_t *keyword_obj = json_object();
-            json_object_set_new(keyword_obj, "count", json_integer(entry->count));
-
-            json_t *occurrences_array = json_array();
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                Occurrence *occ = &entry->occurrences[j];
-                json_t *occ_obj = json_object();
-                json_object_set_new(occ_obj, "line_number", json_integer(occ->line_number));
-                json_object_set_new(occ_obj, "file_offset", json_integer(occ->file_offset));
-                json_object_set_new(occ_obj, "line", json_string(occ->line));
-                if (occ->context_before) {
-                    json_object_set_new(occ_obj, "context_before", json_string(occ->context_before));
-                }
-                if (occ->context_after) {
-                    json_object_set_new(occ_obj, "context_after", json_string(occ->context_after));
-                }
-                json_array_append_new(occurrences_array, occ_obj);
-            }
-
-            json_object_set_new(keyword_obj, "occurrences", occurrences_array);
-            json_object_set_new(root, entry->keyword, keyword_obj);
-        }
+int main() {
+    // Ejecutar con privilegios mínimos
+    if (getuid() == 0) {
+        fprintf(stderr, "Error: No ejecutar como root\n");
+        return EXIT_FAILURE;
     }
 
-    return root;
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <filename> <keyword1> [keyword2 ...]\n", argv[0]);
-        return 1;
-    }
-
-    const char *filename = argv[1];
-    int keyword_count = argc - 2;
-    char **keywords = malloc(sizeof(char*) * keyword_count);
-
-    // Normalize keywords (lowercase)
-    for (int i = 0; i < keyword_count; i++) {
-        keywords[i] = strdup(argv[i + 2]);
-        for (char *p = keywords[i]; *p; p++) {
-            *p = tolower(*p);
-        }
-    }
-
-    HashTable *table = create_hash_table();
-    process_file(filename, table, keywords, keyword_count);
-
-    // Convert to JSON and print
-    json_t *root = hash_table_to_json(table);
-    char *json_str = json_dumps(root, JSON_INDENT(2));
-    printf("%s\n", json_str);
-
-    // Cleanup
-    free(json_str);
-    json_decref(root);
-    for (int i = 0; i < keyword_count; i++) {
-        free(keywords[i]);
-    }
-    free(keywords);
-    free_hash_table(table);
-
-    return 0;
+    cargar_tareas();
+    verificar_y_ejecutar_tareas();
+    menu();
+    return EXIT_SUCCESS;
 }

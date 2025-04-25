@@ -1,323 +1,197 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <jansson.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
 
-#define MAX_LINE_LENGTH 4096
-#define CONTEXT_WORDS 10
-#define HASH_TABLE_SIZE 1024
+// --------------------------
+// Estructuras seguras
+// --------------------------
 
-typedef struct {
-    long line_number;
-    long file_offset;
-    char *line;
-    char *context_before;
-    char *context_after;
-} Occurrence;
+#define MAX_USERNAME_LEN 50
+#define MAX_FILENAME_LEN 100
+#define MAX_CONTENT_LEN 4096
 
-typedef struct {
-    char *keyword;
-    int count;
-    Occurrence *occurrences;
-    int occurrences_capacity;
-    int occurrences_size;
-} KeywordEntry;
+typedef enum {
+    USER,
+    ADMIN
+} UserRole;
 
 typedef struct {
-    KeywordEntry *entries[HASH_TABLE_SIZE];
-} HashTable;
+    char username[MAX_USERNAME_LEN + 1]; // +1 para el null terminator
+    UserRole role;
+} User;
 
-unsigned long hash_function(const char *str) {
-    unsigned long hash = 5381;
-    int c;
+typedef struct {
+    bool canRead;
+    bool canWrite;
+    bool canDelete;
+} FilePermissions;
 
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+typedef struct {
+    char filename[MAX_FILENAME_LEN + 1];
+    char content[MAX_CONTENT_LEN + 1];
+    FilePermissions permissions;
+} File;
 
-    return hash % HASH_TABLE_SIZE;
-}
+// --------------------------
+// Funciones seguras
+// --------------------------
 
-HashTable *create_hash_table() {
-    HashTable *table = malloc(sizeof(HashTable));
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        table->entries[i] = NULL;
+// Función segura para copiar strings
+void safe_strcpy(char* dest, const char* src, size_t dest_size) {
+    if (dest == NULL || src == NULL || dest_size == 0) {
+        return;
     }
-    return table;
+    size_t src_len = strlen(src);
+    size_t copy_len = (src_len < dest_size) ? src_len : dest_size - 1;
+    strncpy(dest, src, copy_len);
+    dest[copy_len] = '\0';
 }
 
-KeywordEntry *create_keyword_entry(const char *keyword) {
-    KeywordEntry *entry = malloc(sizeof(KeywordEntry));
-    entry->keyword = strdup(keyword);
-    entry->count = 0;
-    entry->occurrences_capacity = 10;
-    entry->occurrences_size = 0;
-    entry->occurrences = malloc(sizeof(Occurrence) * entry->occurrences_capacity);
-    return entry;
-}
-
-void add_occurrence(KeywordEntry *entry, long line_number, long file_offset, const char *line, 
-                    const char *context_before, const char *context_after) {
-    if (entry->occurrences_size >= entry->occurrences_capacity) {
-        entry->occurrences_capacity *= 2;
-        entry->occurrences = realloc(entry->occurrences, sizeof(Occurrence) * entry->occurrences_capacity);
+// Validación de nombres de archivo
+bool is_valid_filename(const char* filename) {
+    if (filename == NULL || strlen(filename) == 0 || strlen(filename) > MAX_FILENAME_LEN) {
+        return false;
     }
-
-    Occurrence *occ = &entry->occurrences[entry->occurrences_size++];
-    occ->line_number = line_number;
-    occ->file_offset = file_offset;
-    occ->line = strdup(line);
-    occ->context_before = context_before ? strdup(context_before) : NULL;
-    occ->context_after = context_after ? strdup(context_after) : NULL;
-}
-
-void add_keyword_occurrence(HashTable *table, const char *keyword, long line_number, 
-                           long file_offset, const char *line, const char *context_before, 
-                           const char *context_after) {
-    unsigned long slot = hash_function(keyword);
-    KeywordEntry *entry = table->entries[slot];
-
-    if (entry == NULL) {
-        entry = create_keyword_entry(keyword);
-        table->entries[slot] = entry;
-    } else {
-        // Handle collisions (simple linear probing)
-        while (entry != NULL && strcmp(entry->keyword, keyword) != 0) {
-            slot = (slot + 1) % HASH_TABLE_SIZE;
-            entry = table->entries[slot];
-        }
-
-        if (entry == NULL) {
-            entry = create_keyword_entry(keyword);
-            table->entries[slot] = entry;
+    
+    // Prevenir path traversal
+    if (strstr(filename, "../") || strstr(filename, "/..") || strchr(filename, '\\')) {
+        return false;
+    }
+    
+    // Caracteres permitidos (personalizable)
+    const char* allowed_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.";
+    for (size_t i = 0; i < strlen(filename); i++) {
+        if (!strchr(allowed_chars, filename[i])) {
+            return false;
         }
     }
-
-    entry->count++;
-    add_occurrence(entry, line_number, file_offset, line, context_before, context_after);
+    
+    return true;
 }
 
-void free_hash_table(HashTable *table) {
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            free(entry->keyword);
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                free(entry->occurrences[j].line);
-                free(entry->occurrences[j].context_before);
-                free(entry->occurrences[j].context_after);
-            }
-            free(entry->occurrences);
-            free(entry);
-        }
+FilePermissions set_permissions(UserRole role) {
+    FilePermissions permissions = {false, false, false};
+    
+    // Principio de menor privilegio
+    permissions.canRead = true; // Todos pueden leer
+    
+    if (role == ADMIN) {
+        permissions.canWrite = true;
+        permissions.canDelete = true;
     }
-    free(table);
+    
+    return permissions;
 }
 
-char **split_words(const char *line, int *word_count) {
-    char **words = NULL;
-    int capacity = 0;
-    int count = 0;
-    const char *p = line;
+// --------------------------
+// Operaciones de archivo seguras
+// --------------------------
 
-    while (*p) {
-        while (*p && isspace(*p)) p++;
-        if (!*p) break;
-
-        const char *start = p;
-        while (*p && !isspace(*p)) p++;
-        int len = p - start;
-
-        if (count >= capacity) {
-            capacity = capacity == 0 ? 16 : capacity * 2;
-            words = realloc(words, sizeof(char*) * capacity);
-        }
-
-        words[count] = malloc(len + 1);
-        strncpy(words[count], start, len);
-        words[count][len] = '\0';
-        count++;
+bool read_file(const File* file, const User* user) {
+    if (file == NULL || user == NULL) {
+        return false;
     }
-
-    *word_count = count;
-    return words;
+    
+    if (!file->permissions.canRead) {
+        printf("Error: Permiso denegado para leer '%s'\n", file->filename);
+        return false;
+    }
+    
+    printf("Contenido de '%s':\n%.*s\n", 
+           file->filename, 
+           MAX_CONTENT_LEN, // Prevenir overflows en printf
+           file->content);
+    return true;
 }
 
-void free_words(char **words, int word_count) {
-    for (int i = 0; i < word_count; i++) {
-        free(words[i]);
+bool write_file(File* file, const User* user, const char* new_content) {
+    if (file == NULL || user == NULL || new_content == NULL) {
+        return false;
     }
-    free(words);
+    
+    if (!file->permissions.canWrite) {
+        printf("Error: Permiso denegado para escribir en '%s'\n", file->filename);
+        return false;
+    }
+    
+    safe_strcpy(file->content, new_content, MAX_CONTENT_LEN + 1);
+    printf("Archivo '%s' actualizado\n", file->filename);
+    return true;
 }
 
-char *get_context_before(char **words, int current_word, int word_count) {
-    int start = current_word - CONTEXT_WORDS;
-    if (start < 0) start = 0;
-    int len = current_word - start;
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = start; i < current_word; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > start) strcat(context, " ");
-        strcat(context, words[i]);
+bool delete_file(File* file, const User* user) {
+    if (file == NULL || user == NULL) {
+        return false;
     }
-
-    return context;
+    
+    if (!file->permissions.canDelete) {
+        printf("Error: Permiso denegado para borrar '%s'\n", file->filename);
+        return false;
+    }
+    
+    // Borrado seguro
+    memset(file->content, 0, MAX_CONTENT_LEN);
+    printf("Archivo '%s' marcado para borrado\n", file->filename);
+    return true;
 }
 
-char *get_context_after(char **words, int current_word, int word_count) {
-    int end = current_word + 1 + CONTEXT_WORDS;
-    if (end > word_count) end = word_count;
-    int len = end - (current_word + 1);
+// --------------------------
+// Autenticación y autorización mejorada
+// --------------------------
 
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = current_word + 1; i < end; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > current_word + 1) strcat(context, " ");
-        strcat(context, words[i]);
+bool authenticate_user(User* user, const char* username, UserRole role) {
+    if (user == NULL || username == NULL || strlen(username) == 0) {
+        return false;
     }
-
-    return context;
+    
+    // Validación de entrada
+    if (strlen(username) > MAX_USERNAME_LEN) {
+        return false;
+    }
+    
+    safe_strcpy(user->username, username, MAX_USERNAME_LEN + 1);
+    user->role = role;
+    return true;
 }
 
-void process_file(const char *filename, HashTable *table, char **keywords, int keyword_count) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(1);
+// --------------------------
+// Ejemplo de uso seguro
+// --------------------------
+
+int main() {
+    // Configuración segura
+    User admin, regular_user;
+    File document;
+    
+    if (!authenticate_user(&admin, "admin_secure", ADMIN) ||
+        !authenticate_user(&regular_user, "user_secure", USER)) {
+        printf("Error en autenticación\n");
+        return EXIT_FAILURE;
     }
-
-    char line[MAX_LINE_LENGTH];
-    long line_number = 0;
-    long file_offset = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        size_t line_len = strlen(line);
-        if (line_len > 0 && line[line_len-1] == '\n') {
-            line[line_len-1] = '\0'; // Remove newline
-        }
-
-        int word_count = 0;
-        char **words = split_words(line, &word_count);
-
-        for (int i = 0; i < word_count; i++) {
-            // Normalize word (lowercase, remove punctuation)
-            char *word = words[i];
-            size_t len = strlen(word);
-            for (size_t j = 0; j < len; j++) {
-                if (ispunct(word[j])) {
-                    memmove(&word[j], &word[j+1], len - j);
-                    len--;
-                    j--;
-                } else {
-                    word[j] = tolower(word[j]);
-                }
-            }
-
-            if (len == 0) continue;
-
-            // Check if word is one of our keywords
-            for (int k = 0; k < keyword_count; k++) {
-                if (strcmp(word, keywords[k]) == 0) {
-                    char *context_before = get_context_before(words, i, word_count);
-                    char *context_after = get_context_after(words, i, word_count);
-                    
-                    add_keyword_occurrence(table, keywords[k], line_number, file_offset, 
-                                          line, context_before, context_after);
-                    
-                    free(context_before);
-                    free(context_after);
-                    break;
-                }
-            }
-        }
-
-        free_words(words, word_count);
-        file_offset += line_len;
+    
+    if (!is_valid_filename("documento.txt")) {
+        printf("Nombre de archivo inválido\n");
+        return EXIT_FAILURE;
     }
-
-    fclose(file);
-}
-
-json_t *hash_table_to_json(HashTable *table) {
-    json_t *root = json_object();
-
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            json_t *keyword_obj = json_object();
-            json_object_set_new(keyword_obj, "count", json_integer(entry->count));
-
-            json_t *occurrences_array = json_array();
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                Occurrence *occ = &entry->occurrences[j];
-                json_t *occ_obj = json_object();
-                json_object_set_new(occ_obj, "line_number", json_integer(occ->line_number));
-                json_object_set_new(occ_obj, "file_offset", json_integer(occ->file_offset));
-                json_object_set_new(occ_obj, "line", json_string(occ->line));
-                if (occ->context_before) {
-                    json_object_set_new(occ_obj, "context_before", json_string(occ->context_before));
-                }
-                if (occ->context_after) {
-                    json_object_set_new(occ_obj, "context_after", json_string(occ->context_after));
-                }
-                json_array_append_new(occurrences_array, occ_obj);
-            }
-
-            json_object_set_new(keyword_obj, "occurrences", occurrences_array);
-            json_object_set_new(root, entry->keyword, keyword_obj);
-        }
-    }
-
-    return root;
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <filename> <keyword1> [keyword2 ...]\n", argv[0]);
-        return 1;
-    }
-
-    const char *filename = argv[1];
-    int keyword_count = argc - 2;
-    char **keywords = malloc(sizeof(char*) * keyword_count);
-
-    // Normalize keywords (lowercase)
-    for (int i = 0; i < keyword_count; i++) {
-        keywords[i] = strdup(argv[i + 2]);
-        for (char *p = keywords[i]; *p; p++) {
-            *p = tolower(*p);
-        }
-    }
-
-    HashTable *table = create_hash_table();
-    process_file(filename, table, keywords, keyword_count);
-
-    // Convert to JSON and print
-    json_t *root = hash_table_to_json(table);
-    char *json_str = json_dumps(root, JSON_INDENT(2));
-    printf("%s\n", json_str);
-
-    // Cleanup
-    free(json_str);
-    json_decref(root);
-    for (int i = 0; i < keyword_count; i++) {
-        free(keywords[i]);
-    }
-    free(keywords);
-    free_hash_table(table);
-
-    return 0;
+    
+    // Inicialización segura
+    safe_strcpy(document.filename, "documento.txt", MAX_FILENAME_LEN + 1);
+    safe_strcpy(document.content, "Contenido seguro inicial", MAX_CONTENT_LEN + 1);
+    document.permissions = set_permissions(admin.role);
+    
+    // Operaciones
+    read_file(&document, &admin);
+    write_file(&document, &admin, "Contenido modificado de forma segura");
+    
+    // Cambio de permisos para usuario regular
+    document.permissions = set_permissions(regular_user.role);
+    read_file(&document, &regular_user);
+    
+    // Intentar operaciones no permitidas
+    write_file(&document, &regular_user, "Intento no autorizado");
+    delete_file(&document, &regular_user);
+    
+    return EXIT_SUCCESS;
 }

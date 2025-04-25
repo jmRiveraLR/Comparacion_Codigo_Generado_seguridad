@@ -1,323 +1,260 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <jpeglib.h>
+#include <limits.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <jansson.h>
+#include <fcntl.h>
 
-#define MAX_LINE_LENGTH 4096
-#define CONTEXT_WORDS 10
-#define HASH_TABLE_SIZE 1024
+#pragma pack(push, 1)
+typedef struct {
+    unsigned short type;
+    unsigned int size;
+    unsigned short reserved1;
+    unsigned short reserved2;
+    unsigned int offset;
+} BMPHeader;
 
 typedef struct {
-    long line_number;
-    long file_offset;
-    char *line;
-    char *context_before;
-    char *context_after;
-} Occurrence;
+    unsigned int size;
+    int width;
+    int height;
+    unsigned short planes;
+    unsigned short bitsPerPixel;
+    unsigned int compression;
+    unsigned int imageSize;
+    int xPixelsPerMeter;
+    int yPixelsPerMeter;
+    unsigned int colorsUsed;
+    unsigned int colorsImportant;
+} BMPInfoHeader;
+#pragma pack(pop)
 
-typedef struct {
-    char *keyword;
-    int count;
-    Occurrence *occurrences;
-    int occurrences_capacity;
-    int occurrences_size;
-} KeywordEntry;
-
-typedef struct {
-    KeywordEntry *entries[HASH_TABLE_SIZE];
-} HashTable;
-
-unsigned long hash_function(const char *str) {
-    unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash % HASH_TABLE_SIZE;
-}
-
-HashTable *create_hash_table() {
-    HashTable *table = malloc(sizeof(HashTable));
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        table->entries[i] = NULL;
-    }
-    return table;
-}
-
-KeywordEntry *create_keyword_entry(const char *keyword) {
-    KeywordEntry *entry = malloc(sizeof(KeywordEntry));
-    entry->keyword = strdup(keyword);
-    entry->count = 0;
-    entry->occurrences_capacity = 10;
-    entry->occurrences_size = 0;
-    entry->occurrences = malloc(sizeof(Occurrence) * entry->occurrences_capacity);
-    return entry;
-}
-
-void add_occurrence(KeywordEntry *entry, long line_number, long file_offset, const char *line, 
-                    const char *context_before, const char *context_after) {
-    if (entry->occurrences_size >= entry->occurrences_capacity) {
-        entry->occurrences_capacity *= 2;
-        entry->occurrences = realloc(entry->occurrences, sizeof(Occurrence) * entry->occurrences_capacity);
+// Función para apertura segura de archivos
+FILE* open_secure(const char* path, const char* mode, int is_output) {
+    struct stat st;
+    
+    // Verificar que la ruta es absoluta y no contiene componentes peligrosos
+    if (strstr(path, "../") != NULL || strstr(path, "/..") != NULL) {
+        fprintf(stderr, "Error: Ruta no permitida\n");
+        return NULL;
     }
 
-    Occurrence *occ = &entry->occurrences[entry->occurrences_size++];
-    occ->line_number = line_number;
-    occ->file_offset = file_offset;
-    occ->line = strdup(line);
-    occ->context_before = context_before ? strdup(context_before) : NULL;
-    occ->context_after = context_after ? strdup(context_after) : NULL;
-}
+    // Para archivos de salida, verificar que el directorio existe y es seguro
+    if (is_output) {
+        char* dir = strdup(path);
+        char* last_slash = strrchr(dir, '/');
+        if (last_slash) {
+            *last_slash = '\0';
+            if (stat(dir, &st) != 0 || !S_ISDIR(st.st_mode)) {
+                free(dir);
+                return NULL;
+            }
+            free(dir);
+        }
+    }
 
-void add_keyword_occurrence(HashTable *table, const char *keyword, long line_number, 
-                           long file_offset, const char *line, const char *context_before, 
-                           const char *context_after) {
-    unsigned long slot = hash_function(keyword);
-    KeywordEntry *entry = table->entries[slot];
-
-    if (entry == NULL) {
-        entry = create_keyword_entry(keyword);
-        table->entries[slot] = entry;
+    int fd;
+    if (is_output) {
+        fd = open(path, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     } else {
-        // Handle collisions (simple linear probing)
-        while (entry != NULL && strcmp(entry->keyword, keyword) != 0) {
-            slot = (slot + 1) % HASH_TABLE_SIZE;
-            entry = table->entries[slot];
-        }
-
-        if (entry == NULL) {
-            entry = create_keyword_entry(keyword);
-            table->entries[slot] = entry;
-        }
+        fd = open(path, O_RDONLY | O_NOFOLLOW);
+    }
+    
+    if (fd == -1) {
+        perror("Error al abrir archivo");
+        return NULL;
     }
 
-    entry->count++;
-    add_occurrence(entry, line_number, file_offset, line, context_before, context_after);
-}
-
-void free_hash_table(HashTable *table) {
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            free(entry->keyword);
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                free(entry->occurrences[j].line);
-                free(entry->occurrences[j].context_before);
-                free(entry->occurrences[j].context_after);
-            }
-            free(entry->occurrences);
-            free(entry);
-        }
-    }
-    free(table);
-}
-
-char **split_words(const char *line, int *word_count) {
-    char **words = NULL;
-    int capacity = 0;
-    int count = 0;
-    const char *p = line;
-
-    while (*p) {
-        while (*p && isspace(*p)) p++;
-        if (!*p) break;
-
-        const char *start = p;
-        while (*p && !isspace(*p)) p++;
-        int len = p - start;
-
-        if (count >= capacity) {
-            capacity = capacity == 0 ? 16 : capacity * 2;
-            words = realloc(words, sizeof(char*) * capacity);
-        }
-
-        words[count] = malloc(len + 1);
-        strncpy(words[count], start, len);
-        words[count][len] = '\0';
-        count++;
+    // Verificar que es un archivo regular
+    if (fstat(fd, &st) != 0 || !S_ISREG(st.st_mode)) {
+        close(fd);
+        return NULL;
     }
 
-    *word_count = count;
-    return words;
-}
-
-void free_words(char **words, int word_count) {
-    for (int i = 0; i < word_count; i++) {
-        free(words[i]);
-    }
-    free(words);
-}
-
-char *get_context_before(char **words, int current_word, int word_count) {
-    int start = current_word - CONTEXT_WORDS;
-    if (start < 0) start = 0;
-    int len = current_word - start;
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = start; i < current_word; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > start) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-char *get_context_after(char **words, int current_word, int word_count) {
-    int end = current_word + 1 + CONTEXT_WORDS;
-    if (end > word_count) end = word_count;
-    int len = end - (current_word + 1);
-
-    char *context = malloc(1);
-    context[0] = '\0';
-    size_t total_len = 0;
-
-    for (int i = current_word + 1; i < end; i++) {
-        total_len += strlen(words[i]) + 1;
-        context = realloc(context, total_len);
-        if (i > current_word + 1) strcat(context, " ");
-        strcat(context, words[i]);
-    }
-
-    return context;
-}
-
-void process_file(const char *filename, HashTable *table, char **keywords, int keyword_count) {
-    FILE *file = fopen(filename, "r");
+    FILE* file = fdopen(fd, is_output ? "wb" : "rb");
     if (!file) {
-        perror("Error opening file");
-        exit(1);
+        close(fd);
     }
-
-    char line[MAX_LINE_LENGTH];
-    long line_number = 0;
-    long file_offset = 0;
-
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        size_t line_len = strlen(line);
-        if (line_len > 0 && line[line_len-1] == '\n') {
-            line[line_len-1] = '\0'; // Remove newline
-        }
-
-        int word_count = 0;
-        char **words = split_words(line, &word_count);
-
-        for (int i = 0; i < word_count; i++) {
-            // Normalize word (lowercase, remove punctuation)
-            char *word = words[i];
-            size_t len = strlen(word);
-            for (size_t j = 0; j < len; j++) {
-                if (ispunct(word[j])) {
-                    memmove(&word[j], &word[j+1], len - j);
-                    len--;
-                    j--;
-                } else {
-                    word[j] = tolower(word[j]);
-                }
-            }
-
-            if (len == 0) continue;
-
-            // Check if word is one of our keywords
-            for (int k = 0; k < keyword_count; k++) {
-                if (strcmp(word, keywords[k]) == 0) {
-                    char *context_before = get_context_before(words, i, word_count);
-                    char *context_after = get_context_after(words, i, word_count);
-                    
-                    add_keyword_occurrence(table, keywords[k], line_number, file_offset, 
-                                          line, context_before, context_after);
-                    
-                    free(context_before);
-                    free(context_after);
-                    break;
-                }
-            }
-        }
-
-        free_words(words, word_count);
-        file_offset += line_len;
-    }
-
-    fclose(file);
+    return file;
 }
 
-json_t *hash_table_to_json(HashTable *table) {
-    json_t *root = json_object();
-
-    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeywordEntry *entry = table->entries[i];
-        if (entry != NULL) {
-            json_t *keyword_obj = json_object();
-            json_object_set_new(keyword_obj, "count", json_integer(entry->count));
-
-            json_t *occurrences_array = json_array();
-            for (int j = 0; j < entry->occurrences_size; j++) {
-                Occurrence *occ = &entry->occurrences[j];
-                json_t *occ_obj = json_object();
-                json_object_set_new(occ_obj, "line_number", json_integer(occ->line_number));
-                json_object_set_new(occ_obj, "file_offset", json_integer(occ->file_offset));
-                json_object_set_new(occ_obj, "line", json_string(occ->line));
-                if (occ->context_before) {
-                    json_object_set_new(occ_obj, "context_before", json_string(occ->context_before));
-                }
-                if (occ->context_after) {
-                    json_object_set_new(occ_obj, "context_after", json_string(occ->context_after));
-                }
-                json_array_append_new(occurrences_array, occ_obj);
-            }
-
-            json_object_set_new(keyword_obj, "occurrences", occurrences_array);
-            json_object_set_new(root, entry->keyword, keyword_obj);
-        }
+// Función para verificar encabezado BMP
+int validate_bmp_headers(BMPHeader* header, BMPInfoHeader* infoHeader) {
+    // Verificar firma BMP
+    if (header->type != 0x4D42) {
+        fprintf(stderr, "Error: No es un archivo BMP válido\n");
+        return 0;
     }
 
-    return root;
+    // Verificar bits por pixel
+    if (infoHeader->bitsPerPixel != 24) {
+        fprintf(stderr, "Error: Solo se soportan BMP de 24 bits\n");
+        return 0;
+    }
+
+    // Verificar compresión
+    if (infoHeader->compression != 0) {
+        fprintf(stderr, "Error: No se soportan BMP comprimidos\n");
+        return 0;
+    }
+
+    // Verificar dimensiones razonables
+    if (infoHeader->width <= 0 || infoHeader->width > 16384 || 
+        infoHeader->height <= 0 || infoHeader->height > 16384) {
+        fprintf(stderr, "Error: Dimensiones de imagen no válidas\n");
+        return 0;
+    }
+
+    // Verificar posibles overflows en cálculos de tamaño
+    if (infoHeader->width > INT_MAX / 3 / infoHeader->height) {
+        fprintf(stderr, "Error: Imagen demasiado grande\n");
+        return 0;
+    }
+
+    return 1;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <filename> <keyword1> [keyword2 ...]\n", argv[0]);
+void convertBMPtoJPEG(const char* bmpPath, const char* jpegPath, int quality) {
+    // Validar parámetros de calidad
+    if (quality < 1 || quality > 100) {
+        fprintf(stderr, "Error: Calidad JPEG debe estar entre 1 y 100\n");
+        return;
+    }
+
+    // Apertura segura de archivos
+    FILE* bmpFile = open_secure(bmpPath, "rb", 0);
+    if (!bmpFile) {
+        fprintf(stderr, "Error: No se pudo abrir el archivo BMP %s\n", bmpPath);
+        return;
+    }
+
+    BMPHeader header;
+    BMPInfoHeader infoHeader;
+
+    // Lectura segura de encabezados
+    if (fread(&header, sizeof(BMPHeader), 1, bmpFile) != 1 ||
+        fread(&infoHeader, sizeof(BMPInfoHeader), 1, bmpFile) != 1) {
+        fprintf(stderr, "Error: No se pudo leer encabezados BMP\n");
+        fclose(bmpFile);
+        return;
+    }
+
+    // Validar encabezados BMP
+    if (!validate_bmp_headers(&header, &infoHeader)) {
+        fclose(bmpFile);
+        return;
+    }
+
+    // Configuración JPEG
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+
+    FILE* jpegFile = open_secure(jpegPath, "wb", 1);
+    if (!jpegFile) {
+        fprintf(stderr, "Error: No se pudo crear el archivo JPEG %s\n", jpegPath);
+        fclose(bmpFile);
+        jpeg_destroy_compress(&cinfo);
+        return;
+    }
+
+    jpeg_stdio_dest(&cinfo, jpegFile);
+
+    cinfo.image_width = infoHeader.width;
+    cinfo.image_height = infoHeader.height;
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB;
+
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, quality, TRUE);
+    jpeg_start_compress(&cinfo, TRUE);
+
+    // Calcular padding de filas con verificación de overflow
+    int row_stride = infoHeader.width * 3;
+    int rowPadding = (4 - (row_stride % 4)) % 4;
+
+    // Asignación segura de memoria para filas
+    unsigned char* row = (unsigned char*)malloc(row_stride);
+    if (!row) {
+        fprintf(stderr, "Error: No se pudo asignar memoria\n");
+        fclose(bmpFile);
+        fclose(jpegFile);
+        jpeg_destroy_compress(&cinfo);
+        return;
+    }
+
+    JSAMPROW rowPointer[1];
+    rowPointer[0] = row;
+
+    // Posicionamiento seguro en archivo
+    if (fseek(bmpFile, header.offset, SEEK_SET) != 0) {
+        fprintf(stderr, "Error: Archivo BMP corrupto\n");
+        free(row);
+        fclose(bmpFile);
+        fclose(jpegFile);
+        jpeg_destroy_compress(&cinfo);
+        return;
+    }
+
+    // Procesamiento de filas
+    for (int y = infoHeader.height - 1; y >= 0; y--) {
+        if (fread(row, 3, infoHeader.width, bmpFile) != infoHeader.width) {
+            fprintf(stderr, "Error: Lectura de datos BMP fallida\n");
+            break;
+        }
+        
+        if (rowPadding > 0 && fseek(bmpFile, rowPadding, SEEK_CUR) != 0) {
+            fprintf(stderr, "Error: Archivo BMP corrupto (padding)\n");
+            break;
+        }
+        
+        // Convertir BGR a RGB
+        for (int x = 0; x < infoHeader.width; x++) {
+            unsigned char tmp = row[x * 3];
+            row[x * 3] = row[x * 3 + 2];
+            row[x * 3 + 2] = tmp;
+        }
+        
+        jpeg_write_scanlines(&cinfo, rowPointer, 1);
+    }
+
+    // Liberación segura de recursos
+    free(row);
+    jpeg_finish_compress(&cinfo);
+    fclose(jpegFile);
+    fclose(bmpFile);
+    jpeg_destroy_compress(&cinfo);
+
+    printf("Conversión completada: %s -> %s\n", bmpPath, jpegPath);
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        printf("Uso: %s <archivo_entrada.bmp> <archivo_salida.jpg>\n", argv[0]);
         return 1;
     }
 
-    const char *filename = argv[1];
-    int keyword_count = argc - 2;
-    char **keywords = malloc(sizeof(char*) * keyword_count);
+    const char* bmpPath = argv[1];
+    const char* jpegPath = argv[2];
 
-    // Normalize keywords (lowercase)
-    for (int i = 0; i < keyword_count; i++) {
-        keywords[i] = strdup(argv[i + 2]);
-        for (char *p = keywords[i]; *p; p++) {
-            *p = tolower(*p);
-        }
+    // Validación de extensiones
+    const char* bmpExt = strrchr(bmpPath, '.');
+    const char* jpegExt = strrchr(jpegPath, '.');
+    
+    if (!bmpExt || strcasecmp(bmpExt, ".bmp") != 0) {
+        fprintf(stderr, "Error: El archivo de entrada debe ser .bmp\n");
+        return 1;
+    }
+    
+    if (!jpegExt || (strcasecmp(jpegExt, ".jpg") != 0 && strcasecmp(jpegExt, ".jpeg") != 0)) {
+        fprintf(stderr, "Error: El archivo de salida debe ser .jpg o .jpeg\n");
+        return 1;
     }
 
-    HashTable *table = create_hash_table();
-    process_file(filename, table, keywords, keyword_count);
-
-    // Convert to JSON and print
-    json_t *root = hash_table_to_json(table);
-    char *json_str = json_dumps(root, JSON_INDENT(2));
-    printf("%s\n", json_str);
-
-    // Cleanup
-    free(json_str);
-    json_decref(root);
-    for (int i = 0; i < keyword_count; i++) {
-        free(keywords[i]);
-    }
-    free(keywords);
-    free_hash_table(table);
-
+    convertBMPtoJPEG(bmpPath, jpegPath, 90);
     return 0;
 }

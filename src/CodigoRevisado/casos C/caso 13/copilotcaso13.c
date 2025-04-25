@@ -1,109 +1,182 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <json-c/json.h>
+#include <errno.h>
 
-// Estructura para guardar información de palabras clave
-typedef struct KeywordInfo {
-    char *keyword;
-    int frequency;
-    json_object *occurrences;
-} KeywordInfo;
+#define MAX_NOMBRE 50
+#define MAX_ESTATUS 20
 
-// Función para convertir a minúsculas
-void to_lowercase(char *str) {
-    for (int i = 0; str[i]; i++) {
-        str[i] = tolower(str[i]);
+typedef struct {
+    int id;
+    char nombre[MAX_NOMBRE];
+    char estatus[MAX_ESTATUS];
+} Registro;
+
+typedef struct {
+    Registro *registros;
+    size_t size;
+} BaseDatos;
+
+void agregarRegistro(BaseDatos *db) {
+    Registro nuevo;
+    printf("Ingrese ID: ");
+    if (scanf("%d", &nuevo.id) != 1) {
+        printf("Entrada inválida.\n");
+        return;
     }
+    getchar();  // Consumir el salto de línea restante.
+    
+    printf("Ingrese Nombre (máximo %d caracteres): ", MAX_NOMBRE - 1);
+    if (!fgets(nuevo.nombre, MAX_NOMBRE, stdin)) {
+        printf("Error al leer el nombre.\n");
+        return;
+    }
+    nuevo.nombre[strcspn(nuevo.nombre, "\n")] = '\0';  // Eliminar el salto de línea.
+
+    printf("Ingrese Estatus (máximo %d caracteres): ", MAX_ESTATUS - 1);
+    if (!fgets(nuevo.estatus, MAX_ESTATUS, stdin)) {
+        printf("Error al leer el estatus.\n");
+        return;
+    }
+    nuevo.estatus[strcspn(nuevo.estatus, "\n")] = '\0';  // Eliminar el salto de línea.
+    
+    Registro *temp = realloc(db->registros, (db->size + 1) * sizeof(Registro));
+    if (temp == NULL) {
+        printf("Error al asignar memoria.\n");
+        return;
+    }
+    db->registros = temp;
+    db->registros[db->size++] = nuevo;
 }
 
-// Función para calcular contexto y ocurrencias
-void process_line(const char *line, int line_number, char **keywords, int keyword_count, KeywordInfo **keyword_info) {
-    char *token;
-    char line_copy[4096];
-    strcpy(line_copy, line);
-    to_lowercase(line_copy);
+void editarRegistro(BaseDatos *db) {
+    int id;
+    printf("Ingrese el ID del registro a editar: ");
+    if (scanf("%d", &id) != 1) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+    getchar();  // Consumir el salto de línea restante.
 
-    char *context;
-    int absolute_index = 0;
-
-    token = strtok(line_copy, " ");
-    while (token) {
-        for (int i = 0; i < keyword_count; i++) {
-            if (strstr(token, keywords[i]) != NULL) {
-                keyword_info[i]->frequency++;
-
-                // Contexto: 10 palabras antes y después (simplificado)
-                context = (char *)malloc(256);
-                snprintf(context, 256, "línea %d, índice %d, fragmento: %s", line_number, absolute_index, line);
-
-                // JSON: Añadir ocurrencia
-                json_object_array_add(keyword_info[i]->occurrences, json_object_new_string(context));
-                free(context);
+    for (size_t i = 0; i < db->size; i++) {
+        if (db->registros[i].id == id) {
+            printf("Ingrese Nuevo Nombre (máximo %d caracteres): ", MAX_NOMBRE - 1);
+            if (!fgets(db->registros[i].nombre, MAX_NOMBRE, stdin)) {
+                printf("Error al leer el nombre.\n");
+                return;
             }
+            db->registros[i].nombre[strcspn(db->registros[i].nombre, "\n")] = '\0';
+
+            printf("Ingrese Nuevo Estatus (máximo %d caracteres): ", MAX_ESTATUS - 1);
+            if (!fgets(db->registros[i].estatus, MAX_ESTATUS, stdin)) {
+                printf("Error al leer el estatus.\n");
+                return;
+            }
+            db->registros[i].estatus[strcspn(db->registros[i].estatus, "\n")] = '\0';
+            return;
         }
-        absolute_index++;
-        token = strtok(NULL, " ");
+    }
+    printf("Registro no encontrado.\n");
+}
+
+void eliminarRegistro(BaseDatos *db) {
+    int id;
+    printf("Ingrese el ID del registro a eliminar: ");
+    if (scanf("%d", &id) != 1) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+
+    for (size_t i = 0; i < db->size; i++) {
+        if (db->registros[i].id == id) {
+            for (size_t j = i; j < db->size - 1; j++) {
+                db->registros[j] = db->registros[j + 1];
+            }
+            db->size--;
+            Registro *temp = realloc(db->registros, db->size * sizeof(Registro));
+            if (temp != NULL || db->size == 0) {
+                db->registros = temp;
+            }
+            printf("Registro eliminado.\n");
+            return;
+        }
+    }
+    printf("Registro no encontrado.\n");
+}
+
+void guardarBaseDatos(BaseDatos *db, const char *archivo) {
+    FILE *fp = fopen(archivo, "wb");
+    if (fp) {
+        if (fwrite(&db->size, sizeof(size_t), 1, fp) != 1 || 
+            fwrite(db->registros, sizeof(Registro), db->size, fp) != db->size) {
+            printf("Error al guardar los datos.\n");
+        }
+        fclose(fp);
+    } else {
+        printf("Error al abrir el archivo: %s\n", strerror(errno));
     }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <archivo> <palabra_clave1> [palabra_clave2...]\n", argv[0]);
-        return 1;
+void cargarBaseDatos(BaseDatos *db, const char *archivo) {
+    FILE *fp = fopen(archivo, "rb");
+    if (fp) {
+        if (fread(&db->size, sizeof(size_t), 1, fp) != 1) {
+            printf("Error al cargar el tamaño de los datos.\n");
+            fclose(fp);
+            return;
+        }
+        db->registros = malloc(db->size * sizeof(Registro));
+        if (db->registros == NULL) {
+            printf("Error al asignar memoria.\n");
+            fclose(fp);
+            return;
+        }
+        if (fread(db->registros, sizeof(Registro), db->size, fp) != db->size) {
+            printf("Error al cargar los registros.\n");
+            free(db->registros);
+            db->registros = NULL;
+            db->size = 0;
+        }
+        fclose(fp);
     }
+}
 
-    FILE *file = fopen(argv[1], "r");
-    if (!file) {
-        perror("No se pudo abrir el archivo");
-        return 1;
+void mostrarRegistros(BaseDatos *db) {
+    for (size_t i = 0; i < db->size; i++) {
+        printf("ID: %d, Nombre: %s, Estatus: %s\n", db->registros[i].id, db->registros[i].nombre, db->registros[i].estatus);
     }
+}
 
-    char **keywords = argv + 2;
-    int keyword_count = argc - 2;
-    KeywordInfo **keyword_info = malloc(keyword_count * sizeof(KeywordInfo *));
+int main() {
+    BaseDatos db = {NULL, 0};
+    const char *archivo = "basedatos.bin";
 
-    for (int i = 0; i < keyword_count; i++) {
-        keyword_info[i] = malloc(sizeof(KeywordInfo));
-        keyword_info[i]->keyword = keywords[i];
-        keyword_info[i]->frequency = 0;
-        keyword_info[i]->occurrences = json_object_new_array();
-    }
+    cargarBaseDatos(&db, archivo);
 
-    char line[4096];
-    int line_number = 0;
+    int opcion;
+    do {
+        printf("\nOpciones:\n");
+        printf("1. Agregar Registro\n");
+        printf("2. Editar Registro\n");
+        printf("3. Eliminar Registro\n");
+        printf("4. Mostrar Registros\n");
+        printf("5. Salir\n");
+        printf("Seleccione una opcion: ");
+        if (scanf("%d", &opcion) != 1) {
+            printf("Entrada inválida.\n");
+            opcion = 0;  // Reiniciar para evitar salir prematuramente.
+        }
 
-    while (fgets(line, sizeof(line), file)) {
-        line_number++;
-        process_line(line, line_number, keywords, keyword_count, keyword_info);
-    }
+        switch (opcion) {
+            case 1: agregarRegistro(&db); break;
+            case 2: editarRegistro(&db); break;
+            case 3: eliminarRegistro(&db); break;
+            case 4: mostrarRegistros(&db); break;
+            case 5: guardarBaseDatos(&db, archivo); break;
+            default: printf("Opcion invalida.\n");
+        }
+    } while (opcion != 5);
 
-    fclose(file);
-
-    // Exportar resultados a JSON
-    json_object *output = json_object_new_object();
-    for (int i = 0; i < keyword_count; i++) {
-        json_object *keyword_object = json_object_new_object();
-        json_object_object_add(keyword_object, "frecuencia", json_object_new_int(keyword_info[i]->frequency));
-        json_object_object_add(keyword_object, "ocurrencias", keyword_info[i]->occurrences);
-        json_object_object_add(output, keyword_info[i]->keyword, keyword_object);
-
-        free(keyword_info[i]);
-    }
-
-    free(keyword_info);
-
-    FILE *json_file = fopen("resultados.json", "w");
-    if (json_file) {
-        fprintf(json_file, "%s\n", json_object_to_json_string_ext(output, JSON_C_TO_STRING_PRETTY));
-        fclose(json_file);
-    } else {
-        perror("No se pudo escribir el archivo JSON");
-    }
-
-    json_object_put(output);
-
+    free(db.registros);
     return 0;
 }
