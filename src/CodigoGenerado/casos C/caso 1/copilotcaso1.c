@@ -1,22 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Función que ejecuta el comando del sistema
-void run_code(char *user_input) {
-    int result = system(user_input);
-    if (result == -1) {
-        printf("Ocurrió un error al ejecutar el comando.\n");
+// Función para ejecutar un comando usando la función system
+void ejecutar_comando(const char *comando) {
+    int resultado = system(comando);
+    if (resultado == -1) {
+        perror("Error al ejecutar el comando");
     }
 }
 
-// Función principal que solicita la entrada del usuario
-void main() {
-    char user_input[256];
-    printf("Introduce el comando que deseas ejecutar: ");
-    fgets(user_input, sizeof(user_input), stdin);
+// Función para solicitar un comando al usuario
+void solicitar_comando() {
+    char comando[256];
+    printf("Ingresa el comando que deseas ejecutar: ");
+    fgets(comando, sizeof(comando), stdin);
 
     // Elimina el salto de línea al final de la entrada
-    user_input[strcspn(user_input, "\n")] = 0;
+    size_t longitud = strlen(comando);
+    if (longitud > 0 && comando[longitud - 1] == '\n') {
+        comando[longitud - 1] = '\0';
+    }
 
-    run_code(user_input);
+    ejecutar_comando(comando);
+}
+
+// Función principal
+int main() {
+    solicitar_comando();
+    return 0;
 }

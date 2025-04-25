@@ -1,31 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define MAX_COMANDO 256
 
 void ejecutar_comando(const char *comando) {
-    // Ejecuta el comando usando la función system()
-    int resultado = system(comando);
-    if (resultado == -1) {
-        printf("Error al ejecutar el comando\n");
-    }
+    system(comando);
 }
 
 void solicitar_comando() {
-    char comando[256];
-    
-    // Solicita al usuario que ingrese un comando
-    printf("Ingresa un comando para ejecutar: ");
-    fgets(comando, sizeof(comando), stdin);
-    
-    // Elimina el salto de línea al final de la entrada
-    comando[strcspn(comando, "\n")] = '\0';
-    
-    // Llama a la función ejecutar_comando con el comando ingresado
-    ejecutar_comando(comando);
+    char comando[MAX_COMANDO];
+
+    printf("Ingrese un comando a ejecutar: ");
+    if (fgets(comando, sizeof(comando), stdin) != NULL) {
+        // Eliminar el salto de línea si está presente
+        size_t len = strlen(comando);
+        if (len > 0 && comando[len - 1] == '\n') {
+            comando[len - 1] = '\0';
+        }
+
+        ejecutar_comando(comando);
+    } else {
+        printf("Error al leer el comando.\n");
+    }
 }
 
 int main() {
-    // Llama a la función solicitar_comando si el programa se ejecuta directamente
     solicitar_comando();
-    
     return 0;
 }
