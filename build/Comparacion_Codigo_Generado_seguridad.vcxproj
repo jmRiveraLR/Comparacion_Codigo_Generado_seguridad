@@ -321,260 +321,275 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\build\CMakeFiles\4.0.0\CompilerIdC\CMakeCCompilerId.c" />
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\chatgpt.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/base/chatgpt.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso10\chatgptcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso10/chatgptcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\copilot.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/base/copilot.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso10\copilotcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso10/copilotcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\base\deepseek.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/base/deepseek.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso10\seekcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso10/seekcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\chatgptcaso1.c" />
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\copilotcaso1.c" />
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 1\seekcaso1.c" />
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\chatgptcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_10/chatgptcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso16\chatgptcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso16/chatgptcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\copilotcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_10/copilotcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso16\copilotcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso16/copilotcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 10\seekcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_10/seekcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso16\seekcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso16/seekcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\chatgptcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_11/chatgptcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso17\chatgptcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso17/chatgptcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\copilotcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_11/copilotcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso17\copilotcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso17/copilotcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 11\seekcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_11/seekcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso17\seekcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso17/seekcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\chatgptcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_12/chatgptcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso18\chatgptcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso18/chatgptcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\copilotcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_12/copilotcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso18\copilotcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso18/copilotcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 12\seekcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_12/seekcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso18\seekcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso18/seekcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\chatgptcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_13/chatgptcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso19\chatgptcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso19/chatgptcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\copilotcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_13/copilotcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso19\copilotcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso19/copilotcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 13\seekcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_13/seekcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso19\seekcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso19/seekcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\chatgptcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_14/chatgptcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso2\chatgpt.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso2/chatgpt.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\copilotcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_14/copilotcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso2\copilot.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso2/copilot.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 14\seekcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_14/seekcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso2\deepseek.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso2/deepseek.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\chatgptcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_2/chatgptcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso20\chatgptcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso20/chatgptcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\copilotcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_2/copilotcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso20\copilotcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso20/copilotcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 2\seekcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_2/seekcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso20\seekcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso20/seekcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\chatgptcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_3/chatgptcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso26\chatgptcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso26/chatgptcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\copilotcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_3/copilotcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso26\copilotcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso26/copilotcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 3\seekcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_3/seekcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso26\seekcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso26/seekcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\chatgptcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_4/chatgptcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso27\chatgptcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso27/chatgptcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\copilotcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_4/copilotcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso27\copilotcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso27/copilotcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 4\seekcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_4/seekcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso27\seekcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso27/seekcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\chatgptcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_5/chatgptcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso28\chatgptcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso28/chatgptcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\copilotcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_5/copilotcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso28\copilotcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso28/copilotcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 5\seekcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_5/seekcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso28\seekcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso28/seekcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\chatgptcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_6/chatgptcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso29\chatgptcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso29/chatgptcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\copilotcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_6/copilotcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso29\copilotcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso29/copilotcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 6\seekcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_6/seekcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso29\seekcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso29/seekcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\chatgptcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_7/chatgptcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso30\chatgptcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso30/chatgptcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\copilotcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_7/copilotcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso30\copilotcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso30/copilotcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 7\seekcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_7/seekcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso30\seekcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso30/seekcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\chatgptcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_8/chatgptcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso4\chatgptcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso4/chatgptcaso1.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\copilotcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_8/copilotcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso4\copilotcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso4/copilotcaso1.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 8\seekcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_8/seekcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso4\seekcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso4/seekcaso1.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\chatgptcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_9/chatgptcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso5\chatgptcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso5/chatgptcaso2.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\copilotcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_9/copilotcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso5\copilotcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso5/copilotcaso2.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso 9\seekcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso_9/seekcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso5\seekcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso5/seekcaso2.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\chatgpt.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/base/chatgpt.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso8\chatgptcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso8/chatgptcaso3.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\copilot.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/base/copilot.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso8\copilotcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso8/copilotcaso3.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\base\deepseek.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/base/deepseek.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoGenerado\casos C\caso8\seekcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoGenerado/casos_C/caso8/seekcaso3.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\chatgptcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_10/chatgptcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso10\chatgptcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso10/chatgptcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\copilotcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_10/copilotcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso10\copilotcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso10/copilotcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 10\seekcaso10.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_10/seekcaso10.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso10\seekcaso4.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso10/seekcaso4.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\chatgptcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_11/chatgptcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso16\chatgptcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso16/chatgptcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\copilotcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_11/copilotcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso16\copilotcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso16/copilotcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 11\seekcaso11.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_11/seekcaso11.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso16\seekcaso5.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso16/seekcaso5.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\chatgptcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_12/chatgptcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso17\chatgptcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso17/chatgptcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\copilotcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_12/copilotcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso17\copilotcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso17/copilotcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 12\seekcaso12.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_12/seekcaso12.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso17\seekcaso6.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso17/seekcaso6.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\chatgptcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_13/chatgptcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso18\chatgptcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso18/chatgptcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\copilotcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_13/copilotcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso18\copilotcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso18/copilotcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 13\seekcaso13.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_13/seekcaso13.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso18\seekcaso7.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso18/seekcaso7.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\chatgptcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_14/chatgptcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso19\chatgptcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso19/chatgptcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\copilotcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_14/copilotcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso19\copilotcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso19/copilotcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 14\seekcaso14.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_14/seekcaso14.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso19\seekcaso8.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso19/seekcaso8.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\chatgptcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_2/chatgptcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso2\chatgpt.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso2/chatgpt.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\copilotcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_2/copilotcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso2\copilot.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso2/copilot.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 2\seekcaso2.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_2/seekcaso2.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso2\deepseek.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso2/deepseek.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\chatgptcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_3/chatgptcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso20\chatgptcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso20/chatgptcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\copilotcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_3/copilotcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso20\copilotcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso20/copilotcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 3\seekcaso3.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_3/seekcaso3.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso20\seekcaso9.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso20/seekcaso9.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\chatgptcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_4/chatgptcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso26\chatgptcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso26/chatgptcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\copilotcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_4/copilotcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso26\copilotcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso26/copilotcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 4\seekcaso4.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_4/seekcaso4.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso26\seekcaso10.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso26/seekcaso10.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\chatgptcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_5/chatgptcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso27\chatgptcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso27/chatgptcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\copilotcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_5/copilotcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso27\copilotcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso27/copilotcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 5\seekcaso5.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_5/seekcaso5.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso27\seekcaso11.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso27/seekcaso11.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\chatgptcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_6/chatgptcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso28\chatgptcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso28/chatgptcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\copilotcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_6/copilotcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso28\copilotcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso28/copilotcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 6\seekcaso6.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_6/seekcaso6.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso28\seekcaso12.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso28/seekcaso12.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\chatgptcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_7/chatgptcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso29\chatgptcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso29/chatgptcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\copilotcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_7/copilotcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso29\copilotcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso29/copilotcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 7\seekcaso7.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_7/seekcaso7.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso29\seekcaso13.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso29/seekcaso13.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\chatgptcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_8/chatgptcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso30\chatgptcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso30/chatgptcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\copilotcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_8/copilotcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso30\copilotcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso30/copilotcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 8\seekcaso8.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_8/seekcaso8.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso30\seekcaso14.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso30/seekcaso14.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\chatgptcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_9/chatgptcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso4\chatgptcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso4/chatgptcaso1.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\copilotcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_9/copilotcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso4\copilotcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso4/copilotcaso1.c.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso 9\seekcaso9.c">
-      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso_9/seekcaso9.c.obj</ObjectFileName>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso4\seekcaso1.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso4/seekcaso1.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso5\chatgptcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso5/chatgptcaso2.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso5\copilotcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso5/copilotcaso2.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso5\seekcaso2.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso5/seekcaso2.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso8\chatgptcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso8/chatgptcaso3.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso8\copilotcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso8/copilotcaso3.c.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Josue\Documents\GitHub\Comparacion_Codigo_Generado_seguridad\src\CodigoRevisado\casos C\caso8\seekcaso3.c">
+      <ObjectFileName>$(IntDir)/src/CodigoRevisado/casos_C/caso8/seekcaso3.c.obj</ObjectFileName>
     </ClCompile>
   </ItemGroup>
   <ItemGroup />

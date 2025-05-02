@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Release/Comparacion_Codigo_Generado_seguridad.exe"
+			"path" : "MinSizeRel/Comparacion_Codigo_Generado_seguridad.exe"
 		},
 		{
-			"path" : "Release/Comparacion_Codigo_Generado_seguridad.pdb"
+			"path" : "MinSizeRel/Comparacion_Codigo_Generado_seguridad.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -38,7 +38,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /O2 /Ob2 /DNDEBUG"
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /O1 /Ob1 /DNDEBUG"
 				}
 			],
 			"language" : "C",
@@ -131,7 +131,10 @@
 				84,
 				85,
 				86,
-				87
+				87,
+				88,
+				89,
+				90
 			]
 		}
 	],
@@ -147,7 +150,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /O2 /Ob2 /DNDEBUG",
+				"fragment" : "/DWIN32 /D_WINDOWS /W3 /MD /O1 /Ob1 /DNDEBUG",
 				"role" : "flags"
 			},
 			{
@@ -265,7 +268,10 @@
 				84,
 				85,
 				86,
-				87
+				87,
+				88,
+				89,
+				90
 			]
 		}
 	],
@@ -280,523 +286,541 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/base/chatgpt.c",
+			"path" : "src/CodigoGenerado/casos C/caso10/chatgptcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/base/copilot.c",
+			"path" : "src/CodigoGenerado/casos C/caso10/copilotcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/base/deepseek.c",
+			"path" : "src/CodigoGenerado/casos C/caso10/seekcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 1/chatgptcaso1.c",
+			"path" : "src/CodigoGenerado/casos C/caso16/chatgptcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 1/copilotcaso1.c",
+			"path" : "src/CodigoGenerado/casos C/caso16/copilotcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 1/seekcaso1.c",
+			"path" : "src/CodigoGenerado/casos C/caso16/seekcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 10/chatgptcaso10.c",
+			"path" : "src/CodigoGenerado/casos C/caso17/chatgptcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 10/copilotcaso10.c",
+			"path" : "src/CodigoGenerado/casos C/caso17/copilotcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 10/seekcaso10.c",
+			"path" : "src/CodigoGenerado/casos C/caso17/seekcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 11/chatgptcaso11.c",
+			"path" : "src/CodigoGenerado/casos C/caso18/chatgptcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 11/copilotcaso11.c",
+			"path" : "src/CodigoGenerado/casos C/caso18/copilotcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 11/seekcaso11.c",
+			"path" : "src/CodigoGenerado/casos C/caso18/seekcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 12/chatgptcaso12.c",
+			"path" : "src/CodigoGenerado/casos C/caso19/chatgptcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 12/copilotcaso12.c",
+			"path" : "src/CodigoGenerado/casos C/caso19/copilotcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 12/seekcaso12.c",
+			"path" : "src/CodigoGenerado/casos C/caso19/seekcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 13/chatgptcaso13.c",
+			"path" : "src/CodigoGenerado/casos C/caso2/chatgpt.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 13/copilotcaso13.c",
+			"path" : "src/CodigoGenerado/casos C/caso2/copilot.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 13/seekcaso13.c",
+			"path" : "src/CodigoGenerado/casos C/caso2/deepseek.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 14/chatgptcaso14.c",
+			"path" : "src/CodigoGenerado/casos C/caso20/chatgptcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 14/copilotcaso14.c",
+			"path" : "src/CodigoGenerado/casos C/caso20/copilotcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 14/seekcaso14.c",
+			"path" : "src/CodigoGenerado/casos C/caso20/seekcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 2/chatgptcaso2.c",
+			"path" : "src/CodigoGenerado/casos C/caso26/chatgptcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 2/copilotcaso2.c",
+			"path" : "src/CodigoGenerado/casos C/caso26/copilotcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 2/seekcaso2.c",
+			"path" : "src/CodigoGenerado/casos C/caso26/seekcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 3/chatgptcaso3.c",
+			"path" : "src/CodigoGenerado/casos C/caso27/chatgptcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 3/copilotcaso3.c",
+			"path" : "src/CodigoGenerado/casos C/caso27/copilotcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 3/seekcaso3.c",
+			"path" : "src/CodigoGenerado/casos C/caso27/seekcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 4/chatgptcaso4.c",
+			"path" : "src/CodigoGenerado/casos C/caso28/chatgptcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 4/copilotcaso4.c",
+			"path" : "src/CodigoGenerado/casos C/caso28/copilotcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 4/seekcaso4.c",
+			"path" : "src/CodigoGenerado/casos C/caso28/seekcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 5/chatgptcaso5.c",
+			"path" : "src/CodigoGenerado/casos C/caso29/chatgptcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 5/copilotcaso5.c",
+			"path" : "src/CodigoGenerado/casos C/caso29/copilotcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 5/seekcaso5.c",
+			"path" : "src/CodigoGenerado/casos C/caso29/seekcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 6/chatgptcaso6.c",
+			"path" : "src/CodigoGenerado/casos C/caso30/chatgptcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 6/copilotcaso6.c",
+			"path" : "src/CodigoGenerado/casos C/caso30/copilotcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 6/seekcaso6.c",
+			"path" : "src/CodigoGenerado/casos C/caso30/seekcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 7/chatgptcaso7.c",
+			"path" : "src/CodigoGenerado/casos C/caso4/chatgptcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 7/copilotcaso7.c",
+			"path" : "src/CodigoGenerado/casos C/caso4/copilotcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 7/seekcaso7.c",
+			"path" : "src/CodigoGenerado/casos C/caso4/seekcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 8/chatgptcaso8.c",
+			"path" : "src/CodigoGenerado/casos C/caso5/chatgptcaso2.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 8/copilotcaso8.c",
+			"path" : "src/CodigoGenerado/casos C/caso5/copilotcaso2.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 8/seekcaso8.c",
+			"path" : "src/CodigoGenerado/casos C/caso5/seekcaso2.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 9/chatgptcaso9.c",
+			"path" : "src/CodigoGenerado/casos C/caso8/chatgptcaso3.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 9/copilotcaso9.c",
+			"path" : "src/CodigoGenerado/casos C/caso8/copilotcaso3.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoGenerado/casos C/caso 9/seekcaso9.c",
+			"path" : "src/CodigoGenerado/casos C/caso8/seekcaso3.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/base/chatgpt.c",
+			"path" : "src/CodigoRevisado/casos C/caso10/chatgptcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/base/copilot.c",
+			"path" : "src/CodigoRevisado/casos C/caso10/copilotcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/base/deepseek.c",
+			"path" : "src/CodigoRevisado/casos C/caso10/seekcaso4.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 10/chatgptcaso10.c",
+			"path" : "src/CodigoRevisado/casos C/caso16/chatgptcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 10/copilotcaso10.c",
+			"path" : "src/CodigoRevisado/casos C/caso16/copilotcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 10/seekcaso10.c",
+			"path" : "src/CodigoRevisado/casos C/caso16/seekcaso5.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 11/chatgptcaso11.c",
+			"path" : "src/CodigoRevisado/casos C/caso17/chatgptcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 11/copilotcaso11.c",
+			"path" : "src/CodigoRevisado/casos C/caso17/copilotcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 11/seekcaso11.c",
+			"path" : "src/CodigoRevisado/casos C/caso17/seekcaso6.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 12/chatgptcaso12.c",
+			"path" : "src/CodigoRevisado/casos C/caso18/chatgptcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 12/copilotcaso12.c",
+			"path" : "src/CodigoRevisado/casos C/caso18/copilotcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 12/seekcaso12.c",
+			"path" : "src/CodigoRevisado/casos C/caso18/seekcaso7.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 13/chatgptcaso13.c",
+			"path" : "src/CodigoRevisado/casos C/caso19/chatgptcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 13/copilotcaso13.c",
+			"path" : "src/CodigoRevisado/casos C/caso19/copilotcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 13/seekcaso13.c",
+			"path" : "src/CodigoRevisado/casos C/caso19/seekcaso8.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 14/chatgptcaso14.c",
+			"path" : "src/CodigoRevisado/casos C/caso2/chatgpt.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 14/copilotcaso14.c",
+			"path" : "src/CodigoRevisado/casos C/caso2/copilot.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 14/seekcaso14.c",
+			"path" : "src/CodigoRevisado/casos C/caso2/deepseek.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 2/chatgptcaso2.c",
+			"path" : "src/CodigoRevisado/casos C/caso20/chatgptcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 2/copilotcaso2.c",
+			"path" : "src/CodigoRevisado/casos C/caso20/copilotcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 2/seekcaso2.c",
+			"path" : "src/CodigoRevisado/casos C/caso20/seekcaso9.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 3/chatgptcaso3.c",
+			"path" : "src/CodigoRevisado/casos C/caso26/chatgptcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 3/copilotcaso3.c",
+			"path" : "src/CodigoRevisado/casos C/caso26/copilotcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 3/seekcaso3.c",
+			"path" : "src/CodigoRevisado/casos C/caso26/seekcaso10.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 4/chatgptcaso4.c",
+			"path" : "src/CodigoRevisado/casos C/caso27/chatgptcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 4/copilotcaso4.c",
+			"path" : "src/CodigoRevisado/casos C/caso27/copilotcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 4/seekcaso4.c",
+			"path" : "src/CodigoRevisado/casos C/caso27/seekcaso11.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 5/chatgptcaso5.c",
+			"path" : "src/CodigoRevisado/casos C/caso28/chatgptcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 5/copilotcaso5.c",
+			"path" : "src/CodigoRevisado/casos C/caso28/copilotcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 5/seekcaso5.c",
+			"path" : "src/CodigoRevisado/casos C/caso28/seekcaso12.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 6/chatgptcaso6.c",
+			"path" : "src/CodigoRevisado/casos C/caso29/chatgptcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 6/copilotcaso6.c",
+			"path" : "src/CodigoRevisado/casos C/caso29/copilotcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 6/seekcaso6.c",
+			"path" : "src/CodigoRevisado/casos C/caso29/seekcaso13.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 7/chatgptcaso7.c",
+			"path" : "src/CodigoRevisado/casos C/caso30/chatgptcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 7/copilotcaso7.c",
+			"path" : "src/CodigoRevisado/casos C/caso30/copilotcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 7/seekcaso7.c",
+			"path" : "src/CodigoRevisado/casos C/caso30/seekcaso14.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 8/chatgptcaso8.c",
+			"path" : "src/CodigoRevisado/casos C/caso4/chatgptcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 8/copilotcaso8.c",
+			"path" : "src/CodigoRevisado/casos C/caso4/copilotcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 8/seekcaso8.c",
+			"path" : "src/CodigoRevisado/casos C/caso4/seekcaso1.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 9/chatgptcaso9.c",
+			"path" : "src/CodigoRevisado/casos C/caso5/chatgptcaso2.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 9/copilotcaso9.c",
+			"path" : "src/CodigoRevisado/casos C/caso5/copilotcaso2.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/CodigoRevisado/casos C/caso 9/seekcaso9.c",
+			"path" : "src/CodigoRevisado/casos C/caso5/seekcaso2.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/CodigoRevisado/casos C/caso8/chatgptcaso3.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/CodigoRevisado/casos C/caso8/copilotcaso3.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/CodigoRevisado/casos C/caso8/seekcaso3.c",
 			"sourceGroupIndex" : 0
 		}
 	],
